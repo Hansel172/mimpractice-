@@ -42,7 +42,7 @@ def get_stock_news(ticker: str) -> dict:
 
     url = "https://newsapi.org/v2/everything"
     params = {
-        "q": company_name,
+        "q": f"{ticker.upper()} stock OR {company_name} stock OR {ticker.upper()} shares",
         "sortBy": "publishedAt",
         "pageSize": 5,
         "language": "en",
