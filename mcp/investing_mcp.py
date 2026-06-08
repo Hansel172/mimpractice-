@@ -260,6 +260,105 @@ def research_company(ticker: str) -> dict:
     }
 
 
+def get_insider_trades(ticker: str) -> dict:
+    """Track insider buying and selling — Form 4 filings from SEC EDGAR.
+    When executives buy their own stock with their own money, that's a bullish signal.
+    When they sell large amounts, that can be a warning sign.
+    """
+    headers = {"User-Agent": "InvestingMCP research@example.com"}
+    stock = yf.Ticker(ticker.upper())
+    company_name = stock.info.get("longName", ticker)
+
+    try:
+        # Step 1: get CIK
+        tickers_resp = httpx.get(
+            "https://www.sec.gov/files/company_tickers.json",
+            headers=headers, timeout=10
+        )
+        tickers_data = tickers_resp.json()
+        cik = None
+        for entry in tickers_data.values():
+            if entry["ticker"].upper() == ticker.upper():
+                cik = str(entry["cik_str"]).zfill(10)
+                break
+
+        if not cik:
+            return {"ticker": ticker.upper(), "error": "CIK not found"}
+
+        # Step 2: get Form 4 filings (insider trades)
+        filings_resp = httpx.get(
+            f"https://data.sec.gov/submissions/CIK{cik}.json",
+            headers=headers, timeout=10
+        )
+        data = filings_resp.json()
+        recent = data.get("filings", {}).get("recent", {})
+
+        forms = recent.get("form", [])
+        dates = recent.get("filingDate", [])
+        reporters = recent.get("primaryDocument", [])
+
+        # Step 3: find all Form 4 entries
+        insider_filings = []
+        for form, date, doc in zip(forms, dates, reporters):
+            if form == "4":
+                insider_filings.append({"filed": date, "document": doc})
+            if len(insider_filings) == 10:
+                break
+
+        if not insider_filings:
+            return {
+                "ticker": ticker.upper(),
+                "company": company_name,
+                "message": "No recent insider trades found"
+            }
+
+        # Step 4: parse each Form 4 for transaction details
+        trades = []
+        for filing in insider_filings[:5]:
+            try:
+                doc_parts = filing["document"].replace(".htm", "").replace(".xml", "")
+                xml_url = (
+                    f"https://www.sec.gov/cgi-bin/browse-edgar"
+                    f"?action=getcompany&CIK={cik}&type=4&dateb=&owner=include&count=10&output=atom"
+                )
+                trades.append({
+                    "filed": filing["filed"],
+                    "form": "Form 4 (Insider Trade)",
+                    "sec_link": f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type=4&dateb=&owner=include&count=10"
+                })
+            except Exception:
+                continue
+
+        # Step 5: also get summary from yfinance insider data
+        insider_summary = []
+        try:
+            insider_df = stock.insider_transactions
+            if insider_df is not None and not insider_df.empty:
+                for _, row in insider_df.head(8).iterrows():
+                    shares = row.get("Shares", 0)
+                    action = "BOUGHT" if shares > 0 else "SOLD"
+                    insider_summary.append({
+                        "insider": row.get("Insider", "Unknown"),
+                        "position": row.get("Position", "N/A"),
+                        "action": action,
+                        "shares": f"{abs(int(shares)):,}",
+                        "value": f"${abs(int(row.get('Value', 0))):,}",
+                        "date": str(row.get("Start Date", "N/A"))[:10]
+                    })
+        except Exception:
+            pass
+
+        return {
+            "ticker": ticker.upper(),
+            "company": company_name,
+            "insider_trades": insider_summary if insider_summary else trades,
+            "view_all_filings": f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type=4&dateb=&owner=include&count=40"
+        }
+
+    except Exception as e:
+        return {"ticker": ticker.upper(), "error": str(e)}
+
+
 if __name__ == "__main__":
     print("=== PORTFOLIO SUMMARY ===")
     portfolio = get_portfolio_summary("AAPL, TSLA, NVDA")
