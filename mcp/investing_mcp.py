@@ -125,6 +125,141 @@ def compare_stocks(ticker1: str, ticker2: str) -> dict:
     return {"comparison": results}
 
 
+def get_watchlist_summary(tickers: str) -> dict:
+    """Check your entire watchlist at once — prices, change, and a signal."""
+    ticker_list = [t.strip().upper() for t in tickers.split(",")]
+    watchlist = []
+
+    for ticker in ticker_list:
+        stock = yf.Ticker(ticker)
+        fast = stock.fast_info
+        info = stock.info
+
+        try:
+            price = round(fast.last_price, 2)
+            prev_close = round(fast.previous_close, 2)
+            change_pct = round(((price - prev_close) / prev_close) * 100, 2)
+            year_high = round(fast.year_high, 2)
+            year_low = round(fast.year_low, 2)
+            pct_from_high = round(((price - year_high) / year_high) * 100, 2)
+
+            if change_pct > 2:
+                signal = "STRONG MOVE UP"
+            elif change_pct < -2:
+                signal = "STRONG MOVE DOWN"
+            elif pct_from_high > -5:
+                signal = "NEAR 52W HIGH"
+            else:
+                signal = "NEUTRAL"
+
+            watchlist.append({
+                "ticker": ticker,
+                "company": info.get("shortName", ticker),
+                "price": f"${price}",
+                "change_today": f"{change_pct}%",
+                "pct_from_52w_high": f"{pct_from_high}%",
+                "signal": signal
+            })
+        except Exception:
+            watchlist.append({"ticker": ticker, "error": "Could not fetch"})
+
+    return {"watchlist": watchlist}
+
+
+def get_sec_filings(ticker: str) -> dict:
+    """Get the latest SEC filings for a company from EDGAR."""
+    stock = yf.Ticker(ticker.upper())
+    company_name = stock.info.get("longName", ticker)
+    headers = {"User-Agent": "InvestingMCP research@example.com"}
+
+    try:
+        # Step 1: get CIK from EDGAR ticker lookup
+        tickers_resp = httpx.get(
+            "https://www.sec.gov/files/company_tickers.json",
+            headers=headers, timeout=10
+        )
+        tickers_data = tickers_resp.json()
+        cik = None
+        for entry in tickers_data.values():
+            if entry["ticker"].upper() == ticker.upper():
+                cik = str(entry["cik_str"]).zfill(10)
+                break
+
+        if not cik:
+            return {"ticker": ticker.upper(), "error": "CIK not found"}
+
+        # Step 2: get filings for that CIK
+        filings_resp = httpx.get(
+            f"https://data.sec.gov/submissions/CIK{cik}.json",
+            headers=headers, timeout=10
+        )
+        data = filings_resp.json()
+        recent = data.get("filings", {}).get("recent", {})
+
+        forms = recent.get("form", [])
+        dates = recent.get("filingDate", [])
+        descriptions = recent.get("primaryDocument", [])
+
+        filings = []
+        for form, date, desc in zip(forms, dates, descriptions):
+            if form in ["10-K", "10-Q", "8-K"]:
+                filings.append({"form": form, "filed": date, "document": desc})
+            if len(filings) == 5:
+                break
+
+        return {
+            "ticker": ticker.upper(),
+            "company": company_name,
+            "recent_filings": filings
+        }
+    except Exception as e:
+        return {"ticker": ticker.upper(), "error": str(e)}
+
+
+def research_company(ticker: str) -> dict:
+    """Full company breakdown — price, news, earnings, and SEC filings in one call."""
+    stock = yf.Ticker(ticker.upper())
+    info = stock.info
+    fast = stock.fast_info
+
+    try:
+        price = round(fast.last_price, 2)
+        prev_close = round(fast.previous_close, 2)
+        change_pct = round(((price - prev_close) / prev_close) * 100, 2)
+        market_cap = fast.market_cap
+        pe_ratio = info.get("trailingPE", "N/A")
+        year_high = round(fast.year_high, 2)
+        year_low = round(fast.year_low, 2)
+
+        overview = {
+            "ticker": ticker.upper(),
+            "company": info.get("longName", ticker),
+            "sector": info.get("sector", "N/A"),
+            "industry": info.get("industry", "N/A"),
+            "description": info.get("longBusinessSummary", "N/A")[:300] + "...",
+            "price": f"${price}",
+            "change_today": f"{change_pct}%",
+            "market_cap": f"${round(market_cap / 1_000_000_000, 2)}B" if market_cap else "N/A",
+            "pe_ratio": round(pe_ratio, 2) if isinstance(pe_ratio, float) else "N/A",
+            "52w_high": f"${year_high}",
+            "52w_low": f"${year_low}",
+            "dividend_yield": info.get("dividendYield", "None")
+        }
+    except Exception as e:
+        overview = {"ticker": ticker.upper(), "error": str(e)}
+
+    news = get_stock_news(ticker)
+    earnings = get_earnings(ticker)
+    filings = get_sec_filings(ticker)
+
+    return {
+        "overview": overview,
+        "latest_news": news.get("headlines", [])[:3],
+        "earnings": earnings.get("last_4_quarters", [])[:2],
+        "sec_filings": filings.get("recent_filings", [])[:3]
+    }
+
+
 if __name__ == "__main__":
     print("=== PORTFOLIO SUMMARY ===")
     portfolio = get_portfolio_summary("AAPL, TSLA, NVDA")
