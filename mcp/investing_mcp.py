@@ -1,8 +1,23 @@
 import yfinance as yf
 import httpx
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 NEWS_API_KEY = "ec86790d8a8349bba91acd058157a73d"
+
+
+def _rh_login():
+    import robin_stocks.robinhood as r
+    r.login(
+        os.getenv("ROBINHOOD_USERNAME"),
+        os.getenv("ROBINHOOD_PASSWORD"),
+        store_session=True,
+        expiresIn=86400
+    )
+    return r
 
 
 def get_portfolio_summary(tickers: str) -> dict:
@@ -357,6 +372,115 @@ def get_insider_trades(ticker: str) -> dict:
 
     except Exception as e:
         return {"ticker": ticker.upper(), "error": str(e)}
+
+
+def get_robinhood_portfolio() -> dict:
+    """Get your real Robinhood portfolio — all positions, values, and daily change."""
+    try:
+        r = _rh_login()
+
+        positions = r.get_open_stock_positions()
+        portfolio_value = r.load_portfolio_profile()
+        account = r.load_account_profile()
+
+        holdings = []
+        total_value = 0
+
+        for position in positions:
+            try:
+                instrument_url = position.get("instrument")
+                instrument = r.get_instrument_by_url(instrument_url)
+                ticker = instrument.get("symbol", "???")
+
+                quantity = float(position.get("quantity", 0))
+                avg_cost = float(position.get("average_buy_price", 0))
+
+                quote = r.get_stock_quote_by_symbol(ticker)
+                current_price = float(quote.get("last_trade_price", 0))
+
+                market_value = quantity * current_price
+                cost_basis = quantity * avg_cost
+                gain_loss = market_value - cost_basis
+                gain_loss_pct = ((current_price - avg_cost) / avg_cost * 100) if avg_cost else 0
+
+                total_value += market_value
+
+                holdings.append({
+                    "ticker": ticker,
+                    "shares": round(quantity, 4),
+                    "avg_cost": f"${round(avg_cost, 2)}",
+                    "current_price": f"${round(current_price, 2)}",
+                    "market_value": f"${round(market_value, 2)}",
+                    "gain_loss": f"${round(gain_loss, 2)}",
+                    "gain_loss_pct": f"{round(gain_loss_pct, 2)}%",
+                    "status": "UP" if gain_loss >= 0 else "DOWN"
+                })
+            except Exception:
+                continue
+
+        buying_power = float(account.get("buying_power", 0)) if account else 0
+
+        return {
+            "total_market_value": f"${round(total_value, 2)}",
+            "buying_power": f"${round(buying_power, 2)}",
+            "holdings": sorted(holdings, key=lambda x: float(x["market_value"].replace("$", "").replace(",", "")), reverse=True)
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_robinhood_history() -> dict:
+    """Get your recent Robinhood trade history."""
+    try:
+        r = _rh_login()
+        orders = r.get_all_stock_orders()
+
+        trades = []
+        for order in orders[:15]:
+            if order.get("state") != "filled":
+                continue
+            try:
+                instrument = r.get_instrument_by_url(order.get("instrument"))
+                ticker = instrument.get("symbol", "???")
+                side = order.get("side", "").upper()
+                qty = float(order.get("quantity", 0))
+                price = float(order.get("average_price") or order.get("price") or 0)
+                date = order.get("last_transaction_at", "")[:10]
+
+                trades.append({
+                    "ticker": ticker,
+                    "action": side,
+                    "shares": round(qty, 4),
+                    "price": f"${round(price, 2)}",
+                    "total": f"${round(qty * price, 2)}",
+                    "date": date
+                })
+            except Exception:
+                continue
+
+        return {"recent_trades": trades}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_robinhood_buying_power() -> dict:
+    """Get your available cash and buying power in Robinhood."""
+    try:
+        r = _rh_login()
+        account = r.load_account_profile()
+        portfolio = r.load_portfolio_profile()
+
+        return {
+            "buying_power": f"${float(account.get('buying_power', 0)):.2f}",
+            "cash": f"${float(account.get('cash', 0)):.2f}",
+            "portfolio_value": f"${float(portfolio.get('market_value', 0)):.2f}",
+            "total_equity": f"${float(portfolio.get('equity', 0)):.2f}"
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":

@@ -12,6 +12,9 @@ from investing_mcp import (
     get_sec_filings,
     research_company,
     get_insider_trades,
+    get_robinhood_portfolio,
+    get_robinhood_history,
+    get_robinhood_buying_power,
 )
 
 mcp = FastMCP("investing")
@@ -66,6 +69,24 @@ def insider_trades(ticker: str) -> dict:
     """Track insider buying and selling from SEC Form 4 filings.
     Insider buying with their own money is a strong bullish signal."""
     return get_insider_trades(ticker)
+
+
+@mcp.tool()
+def robinhood_portfolio() -> dict:
+    """Get your real Robinhood portfolio — all positions, values, and gain/loss."""
+    return get_robinhood_portfolio()
+
+
+@mcp.tool()
+def robinhood_history() -> dict:
+    """Get your recent Robinhood trade history."""
+    return get_robinhood_history()
+
+
+@mcp.tool()
+def robinhood_buying_power() -> dict:
+    """Get your available cash and buying power in Robinhood."""
+    return get_robinhood_buying_power()
 
 
 if __name__ == "__main__":
