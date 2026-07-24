@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "investing": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["/home/user/mimpractice-/mcp/server.py"]
+    }
+  }
+}
