@@ -15,6 +15,11 @@ from investing_mcp import (
     get_robinhood_portfolio,
     get_robinhood_history,
     get_robinhood_buying_power,
+    get_options_chain,
+    get_open_option_positions,
+    place_option_buy,
+    close_option_position,
+    place_option_with_stop_loss,
 )
 
 mcp = FastMCP("investing")
@@ -87,6 +92,53 @@ def robinhood_history() -> dict:
 def robinhood_buying_power() -> dict:
     """Get your available cash and buying power in Robinhood."""
     return get_robinhood_buying_power()
+
+
+@mcp.tool()
+def options_chain(ticker: str, expiration_date: str = None) -> dict:
+    """Get the options chain for a stock — all strikes, prices, IV, volume.
+    If no expiration_date is given, returns the next available dates.
+    expiration_date format: 'YYYY-MM-DD'"""
+    return get_options_chain(ticker, expiration_date)
+
+
+@mcp.tool()
+def open_option_positions() -> dict:
+    """Get your current open options positions from Robinhood."""
+    return get_open_option_positions()
+
+
+@mcp.tool()
+def buy_option(ticker: str, strike: float, expiration: str, option_type: str,
+               quantity: int, limit_price: float) -> dict:
+    """Buy a call or put option on Robinhood with a limit price.
+    option_type: 'call' or 'put'
+    expiration: 'YYYY-MM-DD'
+    limit_price: max price per share (1 contract = 100 shares)"""
+    return place_option_buy(ticker, strike, expiration, option_type, quantity, limit_price)
+
+
+@mcp.tool()
+def sell_option(ticker: str, strike: float, expiration: str, option_type: str,
+                quantity: int, limit_price: float) -> dict:
+    """Sell (close) an options position on Robinhood.
+    option_type: 'call' or 'put'
+    expiration: 'YYYY-MM-DD'
+    limit_price: minimum price per share you'll accept"""
+    return close_option_position(ticker, strike, expiration, option_type, quantity, limit_price)
+
+
+@mcp.tool()
+def buy_option_with_stop_loss(ticker: str, strike: float, expiration: str, option_type: str,
+                               quantity: int, buy_limit: float, stop_price: float) -> dict:
+    """Buy an option AND set a stop loss in one command.
+    Places the buy order then immediately sets a stop limit sell to protect downside.
+    option_type: 'call' or 'put'
+    expiration: 'YYYY-MM-DD'
+    buy_limit: max price per share to pay
+    stop_price: price per share that triggers the stop loss"""
+    return place_option_with_stop_loss(ticker, strike, expiration, option_type,
+                                       quantity, buy_limit, stop_price)
 
 
 if __name__ == "__main__":

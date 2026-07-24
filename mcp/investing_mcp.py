@@ -483,6 +483,256 @@ def get_robinhood_buying_power() -> dict:
         return {"error": str(e)}
 
 
+def get_options_chain(ticker: str, expiration_date: str = None) -> dict:
+    """Get the options chain for a stock — calls and puts with strikes, prices, and IV.
+    If no expiration_date given, returns the next available expiration dates to choose from.
+    expiration_date format: 'YYYY-MM-DD'
+    """
+    try:
+        stock = yf.Ticker(ticker.upper())
+        available_expirations = stock.options
+
+        if not available_expirations:
+            return {"ticker": ticker.upper(), "error": "No options available for this ticker"}
+
+        if not expiration_date:
+            return {
+                "ticker": ticker.upper(),
+                "message": "Pass an expiration_date to see the chain",
+                "available_expirations": list(available_expirations[:8])
+            }
+
+        chain = stock.option_chain(expiration_date)
+
+        def parse_contracts(df, option_type):
+            contracts = []
+            for _, row in df.iterrows():
+                contracts.append({
+                    "strike": f"${row['strike']:.2f}",
+                    "last_price": f"${row['lastPrice']:.2f}",
+                    "bid": f"${row['bid']:.2f}",
+                    "ask": f"${row['ask']:.2f}",
+                    "volume": int(row['volume']) if row['volume'] == row['volume'] else 0,
+                    "open_interest": int(row['openInterest']) if row['openInterest'] == row['openInterest'] else 0,
+                    "implied_volatility": f"{round(row['impliedVolatility'] * 100, 1)}%",
+                    "in_the_money": bool(row['inTheMoney']),
+                    "type": option_type
+                })
+            return contracts
+
+        calls = parse_contracts(chain.calls, "call")
+        puts = parse_contracts(chain.puts, "put")
+
+        return {
+            "ticker": ticker.upper(),
+            "expiration": expiration_date,
+            "calls": calls[:15],
+            "puts": puts[:15]
+        }
+
+    except Exception as e:
+        return {"ticker": ticker.upper(), "error": str(e)}
+
+
+def get_open_option_positions() -> dict:
+    """Get your current open options positions from Robinhood."""
+    try:
+        r = _rh_login()
+        positions = r.get_open_option_positions()
+
+        if not positions:
+            return {"message": "No open options positions", "positions": []}
+
+        parsed = []
+        for pos in positions:
+            try:
+                option_id = pos.get("option_id") or pos.get("option", "").split("/")[-2]
+                option_data = r.get_option_instrument_data_by_id(option_id) if option_id else {}
+
+                quantity = float(pos.get("quantity", 0))
+                avg_price = float(pos.get("average_price", 0))
+                trade_value_multiplier = float(pos.get("trade_value_multiplier", 100))
+
+                parsed.append({
+                    "ticker": option_data.get("chain_symbol", "???"),
+                    "type": option_data.get("type", "???"),
+                    "strike": f"${float(option_data.get('strike_price', 0)):.2f}",
+                    "expiration": option_data.get("expiration_date", "???"),
+                    "contracts": int(quantity),
+                    "avg_cost_per_share": f"${round(avg_price, 2)}",
+                    "total_cost": f"${round(avg_price * quantity * trade_value_multiplier, 2)}"
+                })
+            except Exception:
+                parsed.append({"raw": pos.get("option", "unknown")})
+
+        return {"open_option_positions": parsed}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def place_option_buy(ticker: str, strike: float, expiration: str, option_type: str,
+                     quantity: int, limit_price: float) -> dict:
+    """Buy a call or put option on Robinhood.
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts (1 contract = 100 shares)
+        limit_price: Max price per share you'll pay (e.g. 1.50 = $150 total per contract)
+    """
+    try:
+        r = _rh_login()
+
+        order = r.order_buy_option_limit(
+            positionEffect='open',
+            creditOrDebit='debit',
+            price=limit_price,
+            symbol=ticker.upper(),
+            quantity=quantity,
+            expirationDate=expiration,
+            strike=strike,
+            optionType=option_type.lower()
+        )
+
+        if order and isinstance(order, dict):
+            return {
+                "status": "ORDER PLACED",
+                "ticker": ticker.upper(),
+                "type": option_type.upper(),
+                "strike": f"${strike}",
+                "expiration": expiration,
+                "contracts": quantity,
+                "limit_price": f"${limit_price} per share",
+                "max_cost": f"${round(limit_price * quantity * 100, 2)} total",
+                "order_id": order.get("id", "N/A")
+            }
+        else:
+            return {"status": "FAILED", "response": str(order)}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def close_option_position(ticker: str, strike: float, expiration: str, option_type: str,
+                          quantity: int, limit_price: float) -> dict:
+    """Sell an options contract to close your position.
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts to close
+        limit_price: Minimum price per share you'll accept
+    """
+    try:
+        r = _rh_login()
+
+        order = r.order_sell_option_limit(
+            positionEffect='close',
+            creditOrDebit='credit',
+            price=limit_price,
+            symbol=ticker.upper(),
+            quantity=quantity,
+            expirationDate=expiration,
+            strike=strike,
+            optionType=option_type.lower()
+        )
+
+        if order and isinstance(order, dict):
+            return {
+                "status": "CLOSE ORDER PLACED",
+                "ticker": ticker.upper(),
+                "type": option_type.upper(),
+                "strike": f"${strike}",
+                "expiration": expiration,
+                "contracts": quantity,
+                "limit_price": f"${limit_price} per share",
+                "min_proceeds": f"${round(limit_price * quantity * 100, 2)} total",
+                "order_id": order.get("id", "N/A")
+            }
+        else:
+            return {"status": "FAILED", "response": str(order)}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, option_type: str,
+                                 quantity: int, buy_limit: float, stop_price: float) -> dict:
+    """Buy an option AND immediately set a stop loss to protect your downside.
+
+    This places two orders:
+    1. A buy order at your limit price
+    2. A stop limit sell order that triggers if the option drops to your stop price
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts
+        buy_limit: Max price per share to pay when buying
+        stop_price: Price per share that triggers your stop loss sell
+    """
+    try:
+        r = _rh_login()
+
+        buy_order = r.order_buy_option_limit(
+            positionEffect='open',
+            creditOrDebit='debit',
+            price=buy_limit,
+            symbol=ticker.upper(),
+            quantity=quantity,
+            expirationDate=expiration,
+            strike=strike,
+            optionType=option_type.lower()
+        )
+
+        # Limit price on stop is 10% below stop to allow fill on fast moves
+        stop_limit_price = round(stop_price * 0.90, 2)
+
+        stop_order = r.order_sell_option_stop_limit(
+            positionEffect='close',
+            creditOrDebit='credit',
+            limitPrice=stop_limit_price,
+            stopPrice=stop_price,
+            symbol=ticker.upper(),
+            quantity=quantity,
+            expirationDate=expiration,
+            strike=strike,
+            optionType=option_type.lower()
+        )
+
+        buy_status = "PLACED" if buy_order and isinstance(buy_order, dict) else "FAILED"
+        stop_status = "PLACED" if stop_order and isinstance(stop_order, dict) else "FAILED"
+
+        return {
+            "summary": f"Buy order {buy_status}, Stop loss {stop_status}",
+            "trade": {
+                "ticker": ticker.upper(),
+                "type": option_type.upper(),
+                "strike": f"${strike}",
+                "expiration": expiration,
+                "contracts": quantity,
+                "buy_limit": f"${buy_limit} per share",
+                "max_cost": f"${round(buy_limit * quantity * 100, 2)}"
+            },
+            "stop_loss": {
+                "triggers_at": f"${stop_price} per share",
+                "sells_at": f"${stop_limit_price} per share (limit)",
+                "order_id": stop_order.get("id", "N/A") if isinstance(stop_order, dict) else "N/A"
+            },
+            "buy_order_id": buy_order.get("id", "N/A") if isinstance(buy_order, dict) else "N/A"
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
 if __name__ == "__main__":
     print("=== PORTFOLIO SUMMARY ===")
     portfolio = get_portfolio_summary("AAPL, TSLA, NVDA")
