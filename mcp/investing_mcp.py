@@ -662,12 +662,15 @@ def close_option_position(ticker: str, strike: float, expiration: str, option_ty
 
 
 def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, option_type: str,
-                                 quantity: int, buy_limit: float, stop_price: float) -> dict:
-    """Buy an option AND immediately set a stop loss to protect your downside.
+                                 quantity: int, buy_limit: float, stop_price: float,
+                                 timeout_seconds: int = 120) -> dict:
+    """Buy an option and set a stop loss ONLY after the buy confirms as filled.
 
-    This places two orders:
-    1. A buy order at your limit price
-    2. A stop limit sell order that triggers if the option drops to your stop price
+    Flow:
+    1. Place the buy order
+    2. Poll every 5 seconds until it fills (up to timeout_seconds)
+    3. Once filled, place the stop limit sell order
+    4. If not filled within timeout, return the buy order ID so you can check back
 
     Args:
         ticker: Stock symbol e.g. 'AAPL'
@@ -677,10 +680,14 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
         quantity: Number of contracts
         buy_limit: Max price per share to pay when buying
         stop_price: Price per share that triggers your stop loss sell
+        timeout_seconds: How long to wait for fill before giving up (default 120s)
     """
+    import time
+
     try:
         r = _rh_login()
 
+        # Step 1: place the buy order
         buy_order = r.order_buy_option_limit(
             positionEffect='open',
             creditOrDebit='debit',
@@ -692,7 +699,46 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
             optionType=option_type.lower()
         )
 
-        # Limit price on stop is 10% below stop to allow fill on fast moves
+        if not buy_order or not isinstance(buy_order, dict):
+            return {"status": "BUY ORDER FAILED", "response": str(buy_order)}
+
+        buy_order_id = buy_order.get("id")
+        if not buy_order_id:
+            return {"status": "BUY ORDER FAILED", "reason": "No order ID returned"}
+
+        # Step 2: poll until filled or timeout
+        elapsed = 0
+        poll_interval = 5
+        fill_price = None
+
+        while elapsed < timeout_seconds:
+            time.sleep(poll_interval)
+            elapsed += poll_interval
+
+            order_info = r.get_option_order_info(buy_order_id)
+            state = order_info.get("state", "")
+
+            if state == "filled":
+                legs = order_info.get("legs", [])
+                if legs:
+                    fill_price = legs[0].get("executions", [{}])[0].get("price")
+                break
+            elif state in ("cancelled", "rejected", "failed"):
+                return {
+                    "status": f"BUY ORDER {state.upper()}",
+                    "buy_order_id": buy_order_id
+                }
+
+        else:
+            # Timed out — buy still pending
+            return {
+                "status": "BUY ORDER PENDING — STOP LOSS NOT YET SET",
+                "reason": f"Buy order did not fill within {timeout_seconds}s",
+                "buy_order_id": buy_order_id,
+                "next_step": "Check your Robinhood app. Once filled, place the stop loss separately."
+            }
+
+        # Step 3: buy is filled — now place the stop loss
         stop_limit_price = round(stop_price * 0.90, 2)
 
         stop_order = r.order_sell_option_stop_limit(
@@ -707,26 +753,26 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
             optionType=option_type.lower()
         )
 
-        buy_status = "PLACED" if buy_order and isinstance(buy_order, dict) else "FAILED"
         stop_status = "PLACED" if stop_order and isinstance(stop_order, dict) else "FAILED"
 
         return {
-            "summary": f"Buy order {buy_status}, Stop loss {stop_status}",
+            "status": f"FILLED + STOP LOSS {stop_status}",
             "trade": {
                 "ticker": ticker.upper(),
                 "type": option_type.upper(),
                 "strike": f"${strike}",
                 "expiration": expiration,
                 "contracts": quantity,
-                "buy_limit": f"${buy_limit} per share",
-                "max_cost": f"${round(buy_limit * quantity * 100, 2)}"
+                "filled_at": f"${fill_price} per share" if fill_price else "confirmed filled",
+                "total_cost": f"${round(float(fill_price or buy_limit) * quantity * 100, 2)}"
             },
             "stop_loss": {
+                "status": stop_status,
                 "triggers_at": f"${stop_price} per share",
                 "sells_at": f"${stop_limit_price} per share (limit)",
-                "order_id": stop_order.get("id", "N/A") if isinstance(stop_order, dict) else "N/A"
+                "stop_order_id": stop_order.get("id", "N/A") if isinstance(stop_order, dict) else "N/A"
             },
-            "buy_order_id": buy_order.get("id", "N/A") if isinstance(buy_order, dict) else "N/A"
+            "buy_order_id": buy_order_id
         }
 
     except Exception as e:

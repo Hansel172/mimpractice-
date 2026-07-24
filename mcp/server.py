@@ -131,8 +131,8 @@ def sell_option(ticker: str, strike: float, expiration: str, option_type: str,
 @mcp.tool()
 def buy_option_with_stop_loss(ticker: str, strike: float, expiration: str, option_type: str,
                                quantity: int, buy_limit: float, stop_price: float) -> dict:
-    """Buy an option AND set a stop loss in one command.
-    Places the buy order then immediately sets a stop limit sell to protect downside.
+    """Buy an option AND set a stop loss — stop is placed only AFTER buy confirms as filled.
+    Waits up to 120 seconds for fill confirmation before placing the stop order.
     option_type: 'call' or 'put'
     expiration: 'YYYY-MM-DD'
     buy_limit: max price per share to pay
