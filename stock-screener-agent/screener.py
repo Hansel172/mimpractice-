@@ -2,7 +2,7 @@ import yfinance as yf
 from datetime import datetime
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-TICKERS_FILE = "tickers.txt"
+TICKERS_FILE = "options_tickers.txt"
 
 # Gate thresholds — adjust these anytime
 DRAWDOWN_MIN = -35   # stock must be at least this far below 52w high (%)

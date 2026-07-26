@@ -3,7 +3,7 @@ import httpx
 from datetime import datetime
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-TICKERS_FILE = "tickers.txt"
+TICKERS_FILE = "fundamentals_tickers.txt"
 NEWS_API_KEY  = "ec86790d8a8349bba91acd058157a73d"
 
 # Gate 1 — Quality thresholds
@@ -247,10 +247,6 @@ def run_fundamentals_screener():
 
     print()
     print("=" * 70)
-    print("  Run options screener (screener.py) on the full-pass list next.")
-    print("=" * 70)
-
-    return [s["ticker"] for s in full_pass]
 
 
 if __name__ == "__main__":
