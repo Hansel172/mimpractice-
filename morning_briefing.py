@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import yfinance as yf
 import httpx
 import random
@@ -59,23 +60,89 @@ QUOTES = [
 ]
 
 
-# ── DATA ──────────────────────────────────────────────────────────────────────
+# Company names are hardcoded rather than pulled from yf.Ticker().info — that
+# call is expensive and Yahoo rate-limits hard from datacenter IPs.
+COMPANY = {
+    "MSFT": "Microsoft Corporation",      "GOOGL": "Alphabet Inc.",
+    "META": "Meta Platforms, Inc.",       "PLTR":  "Palantir Technologies Inc.",
+    "NVDA": "NVIDIA Corporation",         "AMD":   "Advanced Micro Devices, Inc.",
+    "AAPL": "Apple Inc.",
+}
+
+# Every ticker the briefing needs, pulled in one pass up front.
+ALL_TICKERS = (list(INDEXES) + ["^VIX", "^TNX"] + list(MACRO)
+               + list(SECTORS) + WATCHLIST)
+
+_prices = {}   # ticker -> {"price", "prev", "year_high"}
+
+
+def load_prices(retries=3):
+    """Fetch every ticker once, up front, and serve the rest of the briefing
+    from the cache.
+
+    Note: yfinance issues one HTTP request per symbol (multi.py loops over
+    tickers) — there is no true bulk endpoint. What this buys us is not a
+    single request but no *redundant* ones: previously the watchlist was
+    fetched twice per ticker and each news item spent a yf.Ticker().info call,
+    which hits a separate, more aggressively throttled endpoint. Yahoo returns
+    429 to datacenter IPs readily, so the retry/backoff below matters."""
+    global _prices
+    for attempt in range(retries):
+        try:
+            df = yf.download(
+                ALL_TICKERS, period="1y", interval="1d",
+                group_by="ticker", auto_adjust=False,
+                progress=False, threads=True,
+            )
+            if df is None or df.empty:
+                raise ValueError("empty frame")
+
+            for ticker in ALL_TICKERS:
+                try:
+                    sub   = df[ticker] if ticker in df.columns.get_level_values(0) else df
+                    close = sub["Close"].dropna()
+                    if len(close) < 2:
+                        continue
+                    _prices[ticker] = {
+                        "price":     float(close.iloc[-1]),
+                        "prev":      float(close.iloc[-2]),
+                        "year_high": float(sub["High"].dropna().max()),
+                    }
+                except Exception:
+                    continue
+
+            if _prices:
+                print(f"  loaded {len(_prices)}/{len(ALL_TICKERS)} tickers")
+                return
+            raise ValueError("no tickers parsed")
+
+        except Exception as e:
+            wait = 2 ** attempt * 5
+            print(f"  attempt {attempt + 1} failed ({e})")
+            if attempt < retries - 1:
+                print(f"  retrying in {wait}s...")
+                time.sleep(wait)
+
+    print("  WARNING: price data unavailable — sections will be sparse")
+
+
 def fetch(ticker):
-    try:
-        fast  = yf.Ticker(ticker).fast_info
-        price = float(fast.last_price)
-        prev  = float(fast.previous_close)
-        chg   = price - prev
-        pct   = (chg / prev) * 100
-        return price, chg, pct
-    except Exception:
+    """Price, absolute change, percent change — served from the bulk load."""
+    d = _prices.get(ticker)
+    if not d:
         return None, None, None
+    chg = d["price"] - d["prev"]
+    return d["price"], chg, (chg / d["prev"]) * 100
+
+
+def year_high(ticker):
+    d = _prices.get(ticker)
+    return d["year_high"] if d else None
 
 
 def get_news(ticker):
+    company_name = COMPANY.get(ticker.upper(), ticker)
     try:
-        stock = yf.Ticker(ticker.upper())
-        company_name = stock.info.get("longName", ticker)
         params = {
             "q": f"{ticker.upper()} stock OR {company_name} stock",
             "sortBy": "publishedAt", "pageSize": 5,
@@ -88,7 +155,7 @@ def get_news(ticker):
             for a in articles[:3]
         ]
     except Exception:
-        return ticker, []
+        return company_name, []
 
 
 # ── BUILDING BLOCKS ───────────────────────────────────────────────────────────
@@ -195,12 +262,13 @@ def build_email():
     blocks   = []
 
     # ---- gather ----------------------------------------------------------
-    print("Fetching market pulse...")
+    print(f"Loading {len(ALL_TICKERS)} tickers...")
+    load_prices()
+
     index_data = {t: fetch(t) for t in INDEXES}
     vix_price, _, _ = fetch("^VIX")
     tny_price, _, _ = fetch("^TNX")
 
-    print("Fetching sector data...")
     sector_data = []
     for ticker, label in SECTORS.items():
         _, _, pct = fetch(ticker)
@@ -242,7 +310,6 @@ def build_email():
                           + tile_row(gauge)))
 
     # ---- 02 macro --------------------------------------------------------
-    print("Fetching macro data...")
     rows = ""
     for ticker, label in MACRO.items():
         price, chg, pct = fetch(ticker)
@@ -278,32 +345,28 @@ def build_email():
                  f"widest move today is {scale:.2f}%."))
 
     # ---- 04 watchlist ----------------------------------------------------
-    print("Checking watchlist...")
     rows = ""
     in_zone = 0
     for ticker in WATCHLIST:
-        try:
-            fast      = yf.Ticker(ticker).fast_info
-            price     = float(fast.last_price)
-            year_high = float(fast.year_high)
-            from_high = ((price - year_high) / year_high) * 100
-            _, _, day_pct = fetch(ticker)
-
-            zone = -35 <= from_high <= -18
-            if zone:
-                in_zone += 1
-
-            rows += ("<tr>"
-                     + td(ticker, color=INK, weight=600)
-                     + td(f"${price:,.2f}", align="right")
-                     + td(delta(day_pct), align="right")
-                     + td(f"${year_high:,.2f}", align="right", color=MUTED)
-                     + td(f"{from_high:.1f}%", align="right", color=MUTED)
-                     + td(chip("In zone", "good") if zone else chip("Watch", "muted"),
-                          align="right", tnum=False)
-                     + "</tr>")
-        except Exception:
+        price, _, day_pct = fetch(ticker)
+        high = year_high(ticker)
+        if price is None or not high:
             continue
+
+        from_high = ((price - high) / high) * 100
+        zone = -35 <= from_high <= -18
+        if zone:
+            in_zone += 1
+
+        rows += ("<tr>"
+                 + td(ticker, color=INK, weight=600)
+                 + td(f"${price:,.2f}", align="right")
+                 + td(delta(day_pct), align="right")
+                 + td(f"${high:,.2f}", align="right", color=MUTED)
+                 + td(f"{from_high:.1f}%", align="right", color=MUTED)
+                 + td(chip("In zone", "good") if zone else chip("Watch", "muted"),
+                      align="right", tnum=False)
+                 + "</tr>")
 
     zone_line = (f'<span style="color:{UP};font-weight:600;">{in_zone} in the entry zone today.</span>'
                  if in_zone else f'<span style="color:{MUTED};">Nothing in the entry zone today.</span>')
