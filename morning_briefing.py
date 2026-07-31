@@ -1,4 +1,5 @@
 import os
+import sys
 import yfinance as yf
 import httpx
 import random
@@ -16,20 +17,29 @@ NEWS_API_KEY     = "ec86790d8a8349bba91acd058157a73d"
 
 WATCHLIST = ["MSFT", "GOOGL", "META", "PLTR", "NVDA", "AMD", "AAPL"]
 INDEXES   = {"SPY": "S&P 500", "QQQ": "Nasdaq 100", "IBIT": "Bitcoin ETF"}
-MACRO     = {"GC=F": "Gold", "CL=F": "Crude Oil", "DX-Y.NYB": "US Dollar (DXY)", "BTC-USD": "Bitcoin"}
+MACRO     = {"GC=F": "Gold", "CL=F": "Crude oil", "DX-Y.NYB": "US dollar", "BTC-USD": "Bitcoin"}
 SECTORS   = {
-    "XLK":  "Technology",
-    "XLC":  "Communication",
-    "XLY":  "Consumer Disc.",
-    "XLF":  "Financials",
-    "XLI":  "Industrials",
-    "XLV":  "Health Care",
-    "XLP":  "Consumer Staples",
-    "XLB":  "Materials",
-    "XLRE": "Real Estate",
-    "XLU":  "Utilities",
-    "XLE":  "Energy",
+    "XLK":  "Technology",      "XLC":  "Communication",   "XLY":  "Consumer disc.",
+    "XLF":  "Financials",      "XLI":  "Industrials",     "XLV":  "Health care",
+    "XLP":  "Consumer staples", "XLB": "Materials",       "XLRE": "Real estate",
+    "XLU":  "Utilities",       "XLE":  "Energy",
 }
+
+# ── DESIGN TOKENS ─────────────────────────────────────────────────────────────
+# Dark surface. Status colors reserved for direction only — the masthead accent
+# is kept away from the data so no two reds compete for meaning.
+PAGE      = "#0d0d0d"   # page plane
+CARD      = "#161615"   # chart / card surface
+INK       = "#ffffff"   # primary
+INK2      = "#c3c2b7"   # secondary
+MUTED     = "#898781"   # axis / labels
+HAIRLINE  = "#2c2c2a"   # gridline
+BASELINE  = "#383835"   # axis / divider
+UP        = "#0ca30c"   # status: good
+DOWN      = "#d03b3b"   # status: critical
+ACCENT    = "#cc0000"   # masthead only — never adjacent to UP/DOWN
+SANS      = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+TNUM      = "font-variant-numeric:tabular-nums;"
 
 QUOTES = [
     ("The stock market is a device for transferring money from the impatient to the patient.", "Warren Buffett"),
@@ -43,30 +53,23 @@ QUOTES = [
     ("Wide diversification is only required when investors do not understand what they are doing.", "Warren Buffett"),
     ("Opportunities come infrequently. When it rains gold, put out the bucket, not the thimble.", "Warren Buffett"),
     ("The best investment you can make is in yourself.", "Warren Buffett"),
-    ("It's not whether you're right or wrong, but how much money you make when you're right and how much you lose when you're wrong.", "George Soros"),
+    ("It's not whether you're right or wrong, but how much money you make when you're right.", "George Soros"),
     ("The most contrarian thing of all is not to oppose the crowd but to think for yourself.", "Peter Thiel"),
-    ("Bulls make money, bears make money, pigs get slaughtered.", "Wall Street Proverb"),
+    ("Bulls make money, bears make money, pigs get slaughtered.", "Wall Street proverb"),
 ]
 
 
+# ── DATA ──────────────────────────────────────────────────────────────────────
 def fetch(ticker):
     try:
-        fast = yf.Ticker(ticker).fast_info
-        price = round(fast.last_price, 2)
-        prev  = round(fast.previous_close, 2)
-        chg   = round(price - prev, 2)
-        pct   = round((chg / prev) * 100, 2)
+        fast  = yf.Ticker(ticker).fast_info
+        price = float(fast.last_price)
+        prev  = float(fast.previous_close)
+        chg   = price - prev
+        pct   = (chg / prev) * 100
         return price, chg, pct
     except Exception:
         return None, None, None
-
-
-def arrow_color(pct):
-    if pct is None:
-        return "—", "#666"
-    arrow = "▲" if pct >= 0 else "▼"
-    color = "#2ecc71" if pct >= 0 else "#e74c3c"
-    return arrow, color
 
 
 def get_news(ticker):
@@ -75,10 +78,8 @@ def get_news(ticker):
         company_name = stock.info.get("longName", ticker)
         params = {
             "q": f"{ticker.upper()} stock OR {company_name} stock",
-            "sortBy": "publishedAt",
-            "pageSize": 5,
-            "language": "en",
-            "apiKey": NEWS_API_KEY
+            "sortBy": "publishedAt", "pageSize": 5,
+            "language": "en", "apiKey": NEWS_API_KEY,
         }
         resp = httpx.get("https://newsapi.org/v2/everything", params=params, timeout=10)
         articles = resp.json().get("articles", [])
@@ -90,258 +91,303 @@ def get_news(ticker):
         return ticker, []
 
 
-def section_header(title):
-    return f'<h2 style="color:#cc0000;border-bottom:1px solid #2a2a2a;padding-bottom:10px;margin-bottom:20px;letter-spacing:1px;font-size:1.1em;text-transform:uppercase;">{title}</h2>'
+# ── BUILDING BLOCKS ───────────────────────────────────────────────────────────
+def delta(pct):
+    """Signed change with an arrow — direction never rides on color alone."""
+    if pct is None:
+        return f'<span style="color:{MUTED};">&mdash;</span>'
+    color = UP if pct >= 0 else DOWN
+    arrow = "&#9650;" if pct >= 0 else "&#9660;"
+    return f'<span style="color:{color};{TNUM}white-space:nowrap;">{arrow}&nbsp;{abs(pct):.2f}%</span>'
 
 
-def build_email():
-    today = datetime.now().strftime("%A, %B %d, %Y")
-    sections = []
-
-    # ── 1. MARKET PULSE ───────────────────────────────────────────────────────
-    print("Fetching market pulse...")
-    pulse_cells = ""
-    for ticker, label in INDEXES.items():
-        price, chg, pct = fetch(ticker)
-        ar, col = arrow_color(pct)
-        price_str = f"${price:,.2f}" if price else "N/A"
-        pct_str   = f"{ar} {abs(pct):.2f}%" if pct is not None else "—"
-        pulse_cells += f"""
-        <td style="padding:16px 20px;text-align:center;border-right:1px solid #222;">
-          <div style="color:#aaa;font-size:0.8em;margin-bottom:4px;">{label}</div>
-          <div style="font-size:1.3em;font-weight:bold;color:#fff;">{price_str}</div>
-          <div style="color:{col};font-size:0.9em;margin-top:4px;">{pct_str}</div>
-        </td>"""
-
-    vix_price, _, _ = fetch("^VIX")
-    vix_str   = f"{vix_price:.1f}" if vix_price else "N/A"
-    vix_color = "#e74c3c" if vix_price and vix_price > 20 else "#2ecc71"
-    vix_label = "ELEVATED" if vix_price and vix_price > 20 else "CALM"
-
-    tny_price, _, _ = fetch("^TNX")
-    tny_str = f"{tny_price:.2f}%" if tny_price else "N/A"
-
-    pulse_cells += f"""
-        <td style="padding:16px 20px;text-align:center;border-right:1px solid #222;">
-          <div style="color:#aaa;font-size:0.8em;margin-bottom:4px;">VIX (Fear Index)</div>
-          <div style="font-size:1.3em;font-weight:bold;color:{vix_color};">{vix_str}</div>
-          <div style="color:{vix_color};font-size:0.9em;margin-top:4px;">{vix_label}</div>
-        </td>
-        <td style="padding:16px 20px;text-align:center;">
-          <div style="color:#aaa;font-size:0.8em;margin-bottom:4px;">10-Year Yield</div>
-          <div style="font-size:1.3em;font-weight:bold;color:#fff;">{tny_str}</div>
-          <div style="color:#aaa;font-size:0.9em;margin-top:4px;">US Treasury</div>
-        </td>"""
-
-    sections.append(f"""
-    <div style="margin-bottom:36px;">
-      {section_header("📈 Market Pulse")}
-      <table style="width:100%;border-collapse:collapse;background:#1a1a1a;border-radius:8px;overflow:hidden;">
-        <tr>{pulse_cells}</tr>
-      </table>
-    </div>""")
-
-    # ── 2. MACRO DASHBOARD ────────────────────────────────────────────────────
-    print("Fetching macro data...")
-    macro_rows = ""
-    for ticker, label in MACRO.items():
-        price, chg, pct = fetch(ticker)
-        ar, col = arrow_color(pct)
-        if price is None:
-            continue
-        if ticker == "BTC-USD":
-            price_str = f"${price:,.0f}"
-        elif ticker == "DX-Y.NYB":
-            price_str = f"{price:.2f}"
-        elif ticker == "GC=F":
-            price_str = f"${price:,.0f}/oz"
-        elif ticker == "CL=F":
-            price_str = f"${price:.2f}/bbl"
-        else:
-            price_str = f"${price:,.2f}"
-
-        macro_rows += f"""
-        <tr style="border-bottom:1px solid #222;">
-          <td style="padding:10px 14px;font-weight:bold;color:#ddd;">{label}</td>
-          <td style="padding:10px 14px;color:#fff;">{price_str}</td>
-          <td style="padding:10px 14px;color:{col};">{ar} {abs(chg):.2f} ({abs(pct):.2f}%)</td>
-        </tr>"""
-
-    sections.append(f"""
-    <div style="margin-bottom:36px;">
-      {section_header("🌍 Macro Dashboard")}
-      <table style="width:100%;border-collapse:collapse;background:#1a1a1a;border-radius:8px;overflow:hidden;">
-        <tr style="background:#111;color:#666;font-size:0.8em;">
-          <th style="padding:8px 14px;text-align:left;">Asset</th>
-          <th style="padding:8px 14px;text-align:left;">Price</th>
-          <th style="padding:8px 14px;text-align:left;">Today</th>
+def section(number, title, inner, note=None):
+    note_html = f'<div style="color:{MUTED};font-size:12px;line-height:1.5;margin:0 0 14px;">{note}</div>' if note else ""
+    return f"""
+    <tr><td style="padding:0 0 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="padding:0 0 6px;">
+            <span style="color:{MUTED};font-size:11px;letter-spacing:2px;{TNUM}">{number}</span>
+            <span style="color:{INK};font-size:11px;letter-spacing:2px;font-weight:600;text-transform:uppercase;padding-left:10px;">{title}</span>
+          </td>
         </tr>
-        {macro_rows}
+        <tr><td style="border-bottom:1px solid {BASELINE};font-size:0;line-height:0;padding:0 0 12px;">&nbsp;</td></tr>
+        <tr><td style="padding:14px 0 0;">{note_html}{inner}</td></tr>
       </table>
-    </div>""")
+    </td></tr>"""
 
-    # ── 3. SECTOR SCORECARD ───────────────────────────────────────────────────
+
+def stat_tile(label, value, sub_html):
+    return f"""
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background:{CARD};border-radius:10px;">
+      <tr><td style="padding:16px 14px;text-align:center;">
+        <div style="color:{MUTED};font-size:11px;line-height:1.4;padding-bottom:8px;">{label}</div>
+        <div style="color:{INK};font-size:21px;font-weight:600;line-height:1.2;">{value}</div>
+        <div style="font-size:12px;line-height:1.4;padding-top:7px;">{sub_html}</div>
+      </td></tr>
+    </table>"""
+
+
+def tile_row(tiles):
+    """Lay tiles side by side with an 8px surface gap between them."""
+    cells = ""
+    for i, t in enumerate(tiles):
+        if i:
+            cells += '<td width="8" style="font-size:0;line-height:0;">&nbsp;</td>'
+        cells += f'<td valign="top" width="{100 // len(tiles)}%">{t}</td>'
+    return f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>{cells}</tr></table>'
+
+
+def diverging_bar(pct, scale):
+    """Bar growing left (down) or right (up) from a shared zero baseline.
+    Rounded at the data end, square at the baseline."""
+    width = min(abs(pct) / scale * 100, 100) if scale else 0
+    if pct >= 0:
+        left  = '<td width="50%" style="font-size:0;line-height:0;">&nbsp;</td>'
+        right = (f'<td width="50%" style="font-size:0;line-height:0;"><table role="presentation" cellpadding="0" '
+                 f'cellspacing="0" border="0" width="100%"><tr>'
+                 f'<td width="{width:.0f}%" style="background:{UP};height:8px;border-radius:0 4px 4px 0;font-size:0;line-height:0;">&nbsp;</td>'
+                 f'<td style="font-size:0;line-height:0;">&nbsp;</td></tr></table></td>')
+    else:
+        left  = (f'<td width="50%" style="font-size:0;line-height:0;"><table role="presentation" cellpadding="0" '
+                 f'cellspacing="0" border="0" width="100%"><tr>'
+                 f'<td style="font-size:0;line-height:0;">&nbsp;</td>'
+                 f'<td width="{width:.0f}%" style="background:{DOWN};height:8px;border-radius:4px 0 0 4px;font-size:0;line-height:0;">&nbsp;</td>'
+                 f'</tr></table></td>')
+        right = '<td width="50%" style="font-size:0;line-height:0;">&nbsp;</td>'
+
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>{left}'
+            f'<td width="1" style="background:{BASELINE};font-size:0;line-height:0;">&nbsp;</td>{right}</tr></table>')
+
+
+def chip(text, tone):
+    bg, fg = (("#0e2410", UP) if tone == "good" else ("#232322", MUTED))
+    return (f'<span style="background:{bg};color:{fg};font-size:11px;font-weight:600;'
+            f'padding:4px 9px;border-radius:20px;white-space:nowrap;">{text}</span>')
+
+
+def th(text, align="left"):
+    return (f'<th style="padding:0 12px 9px;text-align:{align};color:{MUTED};font-size:11px;'
+            f'font-weight:500;letter-spacing:0.5px;text-transform:uppercase;">{text}</th>')
+
+
+def td(html, align="left", color=None, weight=None, tnum=True):
+    style = f'padding:11px 12px;text-align:{align};font-size:13px;border-top:1px solid {HAIRLINE};'
+    style += f'color:{color or INK2};'
+    if weight:
+        style += f'font-weight:{weight};'
+    if tnum:
+        style += TNUM
+    return f'<td style="{style}">{html}</td>'
+
+
+def data_table(header_cells, rows):
+    return (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
+            f'style="background:{CARD};border-radius:10px;">'
+            f'<tr>{"".join(header_cells)}</tr>{rows}</table>')
+
+
+# ── EMAIL ─────────────────────────────────────────────────────────────────────
+def build_email():
+    today    = datetime.now().strftime("%A, %B %-d, %Y")
+    blocks   = []
+
+    # ---- gather ----------------------------------------------------------
+    print("Fetching market pulse...")
+    index_data = {t: fetch(t) for t in INDEXES}
+    vix_price, _, _ = fetch("^VIX")
+    tny_price, _, _ = fetch("^TNX")
+
     print("Fetching sector data...")
     sector_data = []
     for ticker, label in SECTORS.items():
-        price, chg, pct = fetch(ticker)
+        _, _, pct = fetch(ticker)
         if pct is not None:
             sector_data.append((label, pct))
-
     sector_data.sort(key=lambda x: x[1], reverse=True)
 
-    sector_rows = ""
-    for label, pct in sector_data:
-        ar, col = arrow_color(pct)
-        bar_width = min(abs(pct) * 8, 100)
-        bar_color = "#2ecc71" if pct >= 0 else "#e74c3c"
-        sector_rows += f"""
-        <tr style="border-bottom:1px solid #1a1a1a;">
-          <td style="padding:9px 14px;color:#ccc;font-size:0.9em;">{label}</td>
-          <td style="padding:9px 14px;color:{col};font-weight:bold;">{ar} {abs(pct):.2f}%</td>
-          <td style="padding:9px 14px;width:120px;">
-            <div style="background:#111;border-radius:3px;height:6px;">
-              <div style="background:{bar_color};width:{bar_width}%;height:6px;border-radius:3px;"></div>
-            </div>
-          </td>
-        </tr>"""
+    # ---- lede ------------------------------------------------------------
+    spy_pct = index_data.get("SPY", (None, None, None))[2]
+    green   = sum(1 for _, p in sector_data if p >= 0)
+    bits    = []
+    if spy_pct is not None:
+        bits.append(f"S&amp;P 500 {'up' if spy_pct >= 0 else 'down'} {abs(spy_pct):.2f}%")
+    if sector_data:
+        bits.append(f"{green} of {len(sector_data)} sectors advancing")
+    if vix_price is not None:
+        bits.append(f"VIX at {vix_price:.1f} &mdash; {'elevated' if vix_price > 20 else 'calm'}")
+    lede = ". ".join(bits) + "." if bits else "Markets closed &mdash; no live pricing available."
 
-    sections.append(f"""
-    <div style="margin-bottom:36px;">
-      {section_header("🗂 Sector Scorecard")}
-      <table style="width:100%;border-collapse:collapse;background:#161616;border-radius:8px;overflow:hidden;">
-        <tr style="background:#111;color:#666;font-size:0.8em;">
-          <th style="padding:8px 14px;text-align:left;">Sector</th>
-          <th style="padding:8px 14px;text-align:left;">Change</th>
-          <th style="padding:8px 14px;text-align:left;">Strength</th>
-        </tr>
-        {sector_rows}
-      </table>
-    </div>""")
+    # ---- 01 market pulse -------------------------------------------------
+    idx_tiles = []
+    for ticker, label in INDEXES.items():
+        price, _, pct = index_data[ticker]
+        idx_tiles.append(stat_tile(label, f"${price:,.2f}" if price else "&mdash;", delta(pct)))
 
-    # ── 4. WATCHLIST ALERTS ───────────────────────────────────────────────────
+    vix_tone  = DOWN if (vix_price and vix_price > 20) else UP
+    vix_word  = "Elevated" if (vix_price and vix_price > 20) else "Calm"
+    gauge = [
+        stat_tile("VIX &middot; volatility", f"{vix_price:.1f}" if vix_price else "&mdash;",
+                  f'<span style="color:{vix_tone};font-weight:600;">{vix_word}</span>'
+                  if vix_price else f'<span style="color:{MUTED};">&mdash;</span>'),
+        stat_tile("10-year Treasury", f"{tny_price:.2f}%" if tny_price else "&mdash;",
+                  f'<span style="color:{MUTED};">Benchmark yield</span>'),
+    ]
+
+    blocks.append(section("01", "Market pulse",
+                          tile_row(idx_tiles)
+                          + '<div style="height:8px;line-height:8px;font-size:0;">&nbsp;</div>'
+                          + tile_row(gauge)))
+
+    # ---- 02 macro --------------------------------------------------------
+    print("Fetching macro data...")
+    rows = ""
+    for ticker, label in MACRO.items():
+        price, chg, pct = fetch(ticker)
+        if price is None:
+            continue
+        if   ticker == "BTC-USD":  value = f"${price:,.0f}"
+        elif ticker == "DX-Y.NYB": value = f"{price:,.2f}"
+        elif ticker == "GC=F":     value = f"${price:,.0f}"
+        elif ticker == "CL=F":     value = f"${price:,.2f}"
+        else:                      value = f"${price:,.2f}"
+        rows += ("<tr>"
+                 + td(label, color=INK2, tnum=False)
+                 + td(value, align="right", color=INK, weight=600)
+                 + td(delta(pct), align="right")
+                 + "</tr>")
+
+    blocks.append(section("02", "Macro", data_table(
+        [th("Asset"), th("Price", "right"), th("Today", "right")], rows)))
+
+    # ---- 03 sectors ------------------------------------------------------
+    if sector_data:
+        scale = max(abs(p) for _, p in sector_data) or 1
+        rows  = ""
+        for label, pct in sector_data:
+            rows += ("<tr>"
+                     + td(label, color=INK2, tnum=False)
+                     + td(delta(pct), align="right")
+                     + f'<td style="padding:11px 12px;border-top:1px solid {HAIRLINE};width:44%;">{diverging_bar(pct, scale)}</td>'
+                     + "</tr>")
+        blocks.append(section("03", "Sectors", data_table(
+            [th("Sector"), th("Today", "right"), th("")], rows),
+            note=f"All 11 S&amp;P sectors, strongest first. Bars diverge from a zero baseline &mdash; "
+                 f"widest move today is {scale:.2f}%."))
+
+    # ---- 04 watchlist ----------------------------------------------------
     print("Checking watchlist...")
-    watchlist_rows = ""
-    in_zone_count = 0
+    rows = ""
+    in_zone = 0
     for ticker in WATCHLIST:
         try:
-            stock     = yf.Ticker(ticker)
-            fast      = stock.fast_info
-            price     = round(fast.last_price, 2)
-            year_high = round(fast.year_high, 2)
-            pct       = round(((price - year_high) / year_high) * 100, 1)
-            _, day_chg, day_pct = fetch(ticker)
-            ar, col = arrow_color(day_pct)
+            fast      = yf.Ticker(ticker).fast_info
+            price     = float(fast.last_price)
+            year_high = float(fast.year_high)
+            from_high = ((price - year_high) / year_high) * 100
+            _, _, day_pct = fetch(ticker)
 
-            in_zone    = -35 <= pct <= -18
-            status     = "🟢 In Zone" if in_zone else "⚪ Watch"
-            zone_color = "#2ecc71" if in_zone else "#555"
-            if in_zone:
-                in_zone_count += 1
+            zone = -35 <= from_high <= -18
+            if zone:
+                in_zone += 1
 
-            day_str = f"{ar} {abs(day_pct):.2f}%" if day_pct is not None else "—"
-            watchlist_rows += f"""
-            <tr style="border-bottom:1px solid #1a1a1a;">
-              <td style="padding:10px 14px;font-weight:bold;color:#fff;">{ticker}</td>
-              <td style="padding:10px 14px;color:#ddd;">${price:,.2f}</td>
-              <td style="padding:10px 14px;color:{col};">{day_str}</td>
-              <td style="padding:10px 14px;color:#aaa;">${year_high:,.2f}</td>
-              <td style="padding:10px 14px;color:#aaa;">{pct}%</td>
-              <td style="padding:10px 14px;color:{zone_color};font-weight:bold;">{status}</td>
-            </tr>"""
+            rows += ("<tr>"
+                     + td(ticker, color=INK, weight=600)
+                     + td(f"${price:,.2f}", align="right")
+                     + td(delta(day_pct), align="right")
+                     + td(f"${year_high:,.2f}", align="right", color=MUTED)
+                     + td(f"{from_high:.1f}%", align="right", color=MUTED)
+                     + td(chip("In zone", "good") if zone else chip("Watch", "muted"),
+                          align="right", tnum=False)
+                     + "</tr>")
         except Exception:
             continue
 
-    zone_note = (
-        f'<p style="color:#2ecc71;font-size:0.9em;margin-bottom:12px;">🟢 {in_zone_count} stock(s) currently in the options entry zone.</p>'
-        if in_zone_count else
-        '<p style="color:#666;font-size:0.9em;margin-bottom:12px;">No stocks in the options entry zone today.</p>'
-    )
+    zone_line = (f'<span style="color:{UP};font-weight:600;">{in_zone} in the entry zone today.</span>'
+                 if in_zone else f'<span style="color:{MUTED};">Nothing in the entry zone today.</span>')
 
-    sections.append(f"""
-    <div style="margin-bottom:36px;">
-      {section_header("🎯 Watchlist Alerts")}
-      <p style="color:#666;font-size:0.85em;margin-bottom:8px;">🟢 In Zone = pulled back 18–35% from 52w high — options entry range</p>
-      {zone_note}
-      <table style="width:100%;border-collapse:collapse;background:#161616;border-radius:8px;overflow:hidden;">
-        <tr style="background:#111;color:#666;font-size:0.8em;">
-          <th style="padding:8px 14px;text-align:left;">Ticker</th>
-          <th style="padding:8px 14px;text-align:left;">Price</th>
-          <th style="padding:8px 14px;text-align:left;">Today</th>
-          <th style="padding:8px 14px;text-align:left;">52w High</th>
-          <th style="padding:8px 14px;text-align:left;">From High</th>
-          <th style="padding:8px 14px;text-align:left;">Signal</th>
-        </tr>
-        {watchlist_rows}
-      </table>
-    </div>""")
+    blocks.append(section("04", "Watchlist", data_table(
+        [th("Ticker"), th("Price", "right"), th("Today", "right"),
+         th("52w high", "right"), th("From high", "right"), th("Signal", "right")], rows),
+        note=f"Entry zone = 18&ndash;35% below the 52-week high. {zone_line}"))
 
-    # ── 5. WATCHLIST NEWS ─────────────────────────────────────────────────────
+    # ---- 05 news ---------------------------------------------------------
     print("Fetching news...")
-    news_html = ""
+    cards = ""
     for ticker in WATCHLIST:
-        company_name, headlines = get_news(ticker)
+        company, headlines = get_news(ticker)
         if not headlines:
             continue
-        items = "".join([
-            f'<li style="margin-bottom:8px;color:#bbb;line-height:1.5;">'
-            f'<span style="color:#666;font-size:0.8em;">{hl["source"]} · {hl["published"]}</span><br>'
-            f'<span style="color:#ddd;">{hl["title"]}</span></li>'
-            for hl in headlines
-        ])
-        news_html += f"""
-        <div style="margin-bottom:20px;padding:16px;background:#161616;border-radius:8px;border-left:3px solid #cc0000;">
-          <div style="color:#ff6666;font-weight:bold;margin-bottom:10px;">{ticker} — {company_name}</div>
-          <ul style="padding-left:16px;margin:0;">{items}</ul>
-        </div>"""
+        items = ""
+        for h in headlines:
+            items += (f'<div style="padding:9px 0;border-top:1px solid {HAIRLINE};">'
+                      f'<div style="color:{MUTED};font-size:11px;padding-bottom:3px;">{h["source"]} &middot; {h["published"]}</div>'
+                      f'<div style="color:{INK2};font-size:13px;line-height:1.5;">{h["title"]}</div></div>')
+        cards += (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
+                  f'style="background:{CARD};border-radius:10px;margin-bottom:10px;">'
+                  f'<tr><td style="padding:14px 16px 16px;">'
+                  f'<div style="padding-bottom:4px;">'
+                  f'<span style="color:{INK};font-size:13px;font-weight:600;">{ticker}</span>'
+                  f'<span style="color:{MUTED};font-size:12px;padding-left:8px;">{company}</span></div>'
+                  f'{items}</td></tr></table>')
 
-    sections.append(f"""
-    <div style="margin-bottom:36px;">
-      {section_header("📰 Watchlist News")}
-      {news_html}
-    </div>""")
+    if cards:
+        blocks.append(section("05", "Watchlist news", cards))
 
-    # ── 6. QUOTE OF THE DAY ───────────────────────────────────────────────────
+    # ---- 06 quote --------------------------------------------------------
     quote, author = random.choice(QUOTES)
-    sections.append(f"""
-    <div style="margin-bottom:36px;padding:24px;background:#0d0d0d;border-radius:8px;border:1px solid #1a1a1a;text-align:center;">
-      {section_header("💡 Quote of the Day")}
-      <p style="color:#ccc;font-style:italic;font-size:1.05em;line-height:1.7;margin:0 0 12px 0;">"{quote}"</p>
-      <p style="color:#cc0000;font-size:0.9em;margin:0;">— {author}</p>
-    </div>""")
+    blocks.append(section("06", "Closing thought",
+        f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
+        f'style="background:{CARD};border-radius:10px;"><tr><td style="padding:22px 24px;">'
+        f'<div style="color:{INK2};font-size:15px;line-height:1.65;font-style:italic;">&ldquo;{quote}&rdquo;</div>'
+        f'<div style="color:{MUTED};font-size:12px;padding-top:12px;">&mdash; {author}</div>'
+        f'</td></tr></table>'))
 
-    # ── ASSEMBLE ──────────────────────────────────────────────────────────────
-    body = "\n".join(sections)
+    # ---- assemble --------------------------------------------------------
     return f"""
-    <div style="background:#0a0a0a;color:#f0f0f0;font-family:Georgia,serif;max-width:680px;margin:0 auto;padding:40px 24px;">
-      <div style="text-align:center;margin-bottom:40px;border-bottom:2px solid #cc0000;padding-bottom:28px;">
-        <div style="color:#cc0000;font-size:0.75em;letter-spacing:4px;margin-bottom:8px;text-transform:uppercase;">Daily Intelligence</div>
-        <h1 style="color:#fff;letter-spacing:4px;margin:0;font-size:2em;">MORNING BRIEFING</h1>
-        <p style="color:#666;margin-top:10px;font-style:italic;font-size:0.9em;">{today}</p>
-      </div>
-      {body}
-      <div style="text-align:center;color:#333;font-size:0.75em;margin-top:40px;border-top:1px solid #1a1a1a;padding-top:20px;line-height:1.8;">
-        Automated · Yahoo Finance · NewsAPI<br>
-        Not financial advice. Do your own research.
-      </div>
-    </div>"""
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="background:{PAGE};margin:0;padding:0;">
+  <tr><td align="center" style="padding:32px 16px 48px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="max-width:620px;font-family:{SANS};">
+
+      <tr><td style="padding:0 0 32px;">
+        <div style="color:{ACCENT};font-size:10px;letter-spacing:3px;font-weight:600;text-transform:uppercase;padding-bottom:10px;">Daily intelligence</div>
+        <div style="color:{INK};font-size:30px;font-weight:700;letter-spacing:-0.5px;line-height:1.15;">Morning Briefing</div>
+        <div style="color:{MUTED};font-size:13px;padding-top:8px;">{today}</div>
+        <div style="border-top:2px solid {ACCENT};width:44px;margin:20px 0 0;font-size:0;line-height:0;">&nbsp;</div>
+        <div style="color:{INK2};font-size:15px;line-height:1.6;padding-top:20px;">{lede}</div>
+      </td></tr>
+
+      {"".join(blocks)}
+
+      <tr><td style="border-top:1px solid {HAIRLINE};padding:20px 0 0;text-align:center;">
+        <div style="color:{MUTED};font-size:11px;line-height:1.8;">
+          Automated &middot; Yahoo Finance &middot; NewsAPI<br>
+          Not financial advice. Do your own research.
+        </div>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>"""
 
 
 def send_briefing():
     print(f"Building morning briefing for {TO_EMAIL}...")
     html = build_email()
 
-    today   = datetime.now().strftime("%B %d, %Y")
     message = Mail(
         from_email   = FROM_EMAIL,
         to_emails    = TO_EMAIL,
-        subject      = f"Morning Briefing — {today}",
-        html_content = html
+        subject      = f"Morning Briefing — {datetime.now().strftime('%B %-d, %Y')}",
+        html_content = html,
     )
 
     try:
-        sg       = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
+        response = SendGridAPIClient(SENDGRID_API_KEY).send(message)
         if response.status_code in (200, 202):
             print(f"✓ Briefing sent to {TO_EMAIL}")
         else:
@@ -351,4 +397,10 @@ def send_briefing():
 
 
 if __name__ == "__main__":
-    send_briefing()
+    if "--preview" in sys.argv:
+        out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "preview.html")
+        with open(out, "w") as f:
+            f.write(f'<body style="margin:0;background:{PAGE};">{build_email()}</body>')
+        print(f"✓ Preview written to {out}")
+    else:
+        send_briefing()
