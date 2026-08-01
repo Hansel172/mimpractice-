@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Treasure Room</title>
+    <style>
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #0f0f0f;
+        color: #f0f0f0;
+        font-family: Georgia, serif;
+        min-height: 100vh;
+      }
+
+      header {
+        background-color: #1a0000;
+        border-bottom: 2px solid #cc0000;
+        padding: 30px 0;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 3em;
+        color: #cc0000;
+        letter-spacing: 4px;
+      }
+
+      header p {
+        color: #aaa;
+        margin-top: 8px;
+        font-style: italic;
+        font-size: 1.1em;
+      }
+
+      .store {
+        max-width: 900px;
+        margin: 60px auto;
+        padding: 0 20px;
+      }
+
+      .product-card {
+        background-color: #1a0000;
+        border: 1px solid #cc0000;
+        border-radius: 12px;
+        padding: 40px;
+        display: flex;
+        gap: 40px;
+        align-items: center;
+      }
+
+      .product-icon {
+        font-size: 5em;
+        min-width: 100px;
+        text-align: center;
+      }
+
+      .product-info h2 {
+        font-size: 1.8em;
+        color: #cc0000;
+        margin-bottom: 15px;
+      }
+
+      .product-info p {
+        color: #ccc;
+        line-height: 1.8;
+        font-size: 1.05em;
+        margin-bottom: 25px;
+      }
+
+      .price {
+        font-size: 2em;
+        color: #f0f0f0;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .badge {
+        display: inline-block;
+        background-color: #2a4a2a;
+        color: #5cb85c;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        margin-bottom: 25px;
+      }
+
+      button {
+        background-color: #cc0000;
+        color: #ffffff;
+        border: none;
+        padding: 14px 36px;
+        font-size: 1em;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 1px;
+        transition: background-color 0.2s;
+      }
+
+      button:hover {
+        background-color: #ff1a1a;
+      }
+
+      footer {
+        text-align: center;
+        padding: 40px;
+        color: #555;
+        font-size: 0.9em;
+        border-top: 1px solid #222;
+        margin-top: 80px;
+      }
+
+    </style>
+  </head>
+
+  <body>
+
+    <header>
+      <h1>TREASURE ROOM</h1>
+      <p>Quality products at great prices.</p>
+    </header>
+
+    <div class="store">
+      <div class="product-card">
+
+        <div class="product-icon">📖</div>
+
+        <div class="product-info">
+          <h2>The Power of AI</h2>
+          <p>Discover how the future of intelligence is built on pairing the human mind with AI — and how you can use that to your advantage.</p>
+          <div class="badge">✓ In Stock</div>
+          <div class="price">$20</div>
+          <button>Buy Now</button>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>
+      &copy; 2026 Treasure Room. All rights reserved.
+    </footer>
+
+  </body>
+
+</html>

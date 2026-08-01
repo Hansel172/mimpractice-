@@ -188,6 +188,7 @@ def get_sec_filings(ticker: str) -> dict:
     headers = {"User-Agent": "InvestingMCP research@example.com"}
 
     try:
+        # Step 1: get CIK from EDGAR ticker lookup
         tickers_resp = httpx.get(
             "https://www.sec.gov/files/company_tickers.json",
             headers=headers, timeout=10
@@ -202,6 +203,7 @@ def get_sec_filings(ticker: str) -> dict:
         if not cik:
             return {"ticker": ticker.upper(), "error": "CIK not found"}
 
+        # Step 2: get filings for that CIK
         filings_resp = httpx.get(
             f"https://data.sec.gov/submissions/CIK{cik}.json",
             headers=headers, timeout=10
@@ -274,12 +276,16 @@ def research_company(ticker: str) -> dict:
 
 
 def get_insider_trades(ticker: str) -> dict:
-    """Track insider buying and selling — Form 4 filings from SEC EDGAR."""
+    """Track insider buying and selling — Form 4 filings from SEC EDGAR.
+    When executives buy their own stock with their own money, that's a bullish signal.
+    When they sell large amounts, that can be a warning sign.
+    """
     headers = {"User-Agent": "InvestingMCP research@example.com"}
     stock = yf.Ticker(ticker.upper())
     company_name = stock.info.get("longName", ticker)
 
     try:
+        # Step 1: get CIK
         tickers_resp = httpx.get(
             "https://www.sec.gov/files/company_tickers.json",
             headers=headers, timeout=10
@@ -294,6 +300,7 @@ def get_insider_trades(ticker: str) -> dict:
         if not cik:
             return {"ticker": ticker.upper(), "error": "CIK not found"}
 
+        # Step 2: get Form 4 filings (insider trades)
         filings_resp = httpx.get(
             f"https://data.sec.gov/submissions/CIK{cik}.json",
             headers=headers, timeout=10
@@ -305,6 +312,7 @@ def get_insider_trades(ticker: str) -> dict:
         dates = recent.get("filingDate", [])
         reporters = recent.get("primaryDocument", [])
 
+        # Step 3: find all Form 4 entries
         insider_filings = []
         for form, date, doc in zip(forms, dates, reporters):
             if form == "4":
@@ -319,9 +327,15 @@ def get_insider_trades(ticker: str) -> dict:
                 "message": "No recent insider trades found"
             }
 
+        # Step 4: parse each Form 4 for transaction details
         trades = []
         for filing in insider_filings[:5]:
             try:
+                doc_parts = filing["document"].replace(".htm", "").replace(".xml", "")
+                xml_url = (
+                    f"https://www.sec.gov/cgi-bin/browse-edgar"
+                    f"?action=getcompany&CIK={cik}&type=4&dateb=&owner=include&count=10&output=atom"
+                )
                 trades.append({
                     "filed": filing["filed"],
                     "form": "Form 4 (Insider Trade)",
@@ -330,6 +344,7 @@ def get_insider_trades(ticker: str) -> dict:
             except Exception:
                 continue
 
+        # Step 5: also get summary from yfinance insider data
         insider_summary = []
         try:
             insider_df = stock.insider_transactions
@@ -469,7 +484,10 @@ def get_robinhood_buying_power() -> dict:
 
 
 def get_options_chain(ticker: str, expiration_date: str = None) -> dict:
-    """Get the options chain for a stock — calls and puts with strikes, prices, and IV."""
+    """Get the options chain for a stock — calls and puts with strikes, prices, and IV.
+    If no expiration_date given, returns the next available expiration dates to choose from.
+    expiration_date format: 'YYYY-MM-DD'
+    """
     try:
         stock = yf.Ticker(ticker.upper())
         available_expirations = stock.options
@@ -555,7 +573,16 @@ def get_open_option_positions() -> dict:
 
 def place_option_buy(ticker: str, strike: float, expiration: str, option_type: str,
                      quantity: int, limit_price: float) -> dict:
-    """Buy a call or put option on Robinhood."""
+    """Buy a call or put option on Robinhood.
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts (1 contract = 100 shares)
+        limit_price: Max price per share you'll pay (e.g. 1.50 = $150 total per contract)
+    """
     try:
         r = _rh_login()
 
@@ -591,7 +618,16 @@ def place_option_buy(ticker: str, strike: float, expiration: str, option_type: s
 
 def close_option_position(ticker: str, strike: float, expiration: str, option_type: str,
                           quantity: int, limit_price: float) -> dict:
-    """Sell an options contract to close your position."""
+    """Sell an options contract to close your position.
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts to close
+        limit_price: Minimum price per share you'll accept
+    """
     try:
         r = _rh_login()
 
@@ -628,12 +664,30 @@ def close_option_position(ticker: str, strike: float, expiration: str, option_ty
 def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, option_type: str,
                                  quantity: int, buy_limit: float, stop_price: float,
                                  timeout_seconds: int = 120) -> dict:
-    """Buy an option and set a stop loss ONLY after the buy confirms as filled."""
+    """Buy an option and set a stop loss ONLY after the buy confirms as filled.
+
+    Flow:
+    1. Place the buy order
+    2. Poll every 5 seconds until it fills (up to timeout_seconds)
+    3. Once filled, place the stop limit sell order
+    4. If not filled within timeout, return the buy order ID so you can check back
+
+    Args:
+        ticker: Stock symbol e.g. 'AAPL'
+        strike: Strike price e.g. 150.0
+        expiration: Expiration date 'YYYY-MM-DD'
+        option_type: 'call' or 'put'
+        quantity: Number of contracts
+        buy_limit: Max price per share to pay when buying
+        stop_price: Price per share that triggers your stop loss sell
+        timeout_seconds: How long to wait for fill before giving up (default 120s)
+    """
     import time
 
     try:
         r = _rh_login()
 
+        # Step 1: place the buy order
         buy_order = r.order_buy_option_limit(
             positionEffect='open',
             creditOrDebit='debit',
@@ -652,6 +706,7 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
         if not buy_order_id:
             return {"status": "BUY ORDER FAILED", "reason": "No order ID returned"}
 
+        # Step 2: poll until filled or timeout
         elapsed = 0
         poll_interval = 5
         fill_price = None
@@ -675,6 +730,7 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
                 }
 
         else:
+            # Timed out — buy still pending
             return {
                 "status": "BUY ORDER PENDING — STOP LOSS NOT YET SET",
                 "reason": f"Buy order did not fill within {timeout_seconds}s",
@@ -682,6 +738,7 @@ def place_option_with_stop_loss(ticker: str, strike: float, expiration: str, opt
                 "next_step": "Check your Robinhood app. Once filled, place the stop loss separately."
             }
 
+        # Step 3: buy is filled — now place the stop loss
         stop_limit_price = round(stop_price * 0.90, 2)
 
         stop_order = r.order_sell_option_stop_limit(
@@ -726,3 +783,15 @@ if __name__ == "__main__":
     print("=== PORTFOLIO SUMMARY ===")
     portfolio = get_portfolio_summary("AAPL, TSLA, NVDA")
     print(json.dumps(portfolio, indent=2))
+
+    print("\n=== STOCK NEWS ===")
+    news = get_stock_news("AAPL")
+    print(json.dumps(news, indent=2))
+
+    print("\n=== EARNINGS ===")
+    earnings = get_earnings("AAPL")
+    print(json.dumps(earnings, indent=2))
+
+    print("\n=== COMPARE STOCKS ===")
+    comparison = compare_stocks("AAPL", "MSFT")
+    print(json.dumps(comparison, indent=2))
