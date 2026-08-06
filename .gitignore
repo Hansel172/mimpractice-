@@ -128,3 +128,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 preview.html
+
+# macro-tracker — personal data, never commit to a public repo
+macro-tracker/.env
+macro-tracker/profile.local.json
+macro-tracker/data/live.json
+macro-tracker/data/themes.json
+macro-tracker/data/bundle.js
+macro-tracker/profile.example.json.bak

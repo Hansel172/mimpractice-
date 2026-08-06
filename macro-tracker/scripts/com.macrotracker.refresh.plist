@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.macrotracker.refresh</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>REPLACE_WITH_ABSOLUTE_PATH/macro-tracker/scripts/daily.sh</string>
+  </array>
+  <!-- 07:10 daily. Off the hour on purpose: FRED publishes on the hour and
+       everyone's scheduler fires at :00. -->
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>7</integer><key>Minute</key><integer>10</integer></dict>
+  <key>StandardOutPath</key><string>/tmp/macrotracker.log</string>
+  <key>StandardErrorPath</key><string>/tmp/macrotracker.err</string>
+  <key>RunAtLoad</key><false/>
+</dict>
+</plist>
