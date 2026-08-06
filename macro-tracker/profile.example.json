@@ -1,0 +1,24 @@
+{
+  "_note": "Template. Copy to profile.local.json (gitignored) and fill in. Never put real holdings here — this file IS committed.",
+  "about": {
+    "age": 0,
+    "role": "Your role",
+    "employer": "Your employer",
+    "horizon": "e.g. 10+ years",
+    "approach": "e.g. Long-term investor, dollar-cost averages, does not time the market."
+  },
+  "holdings": {
+    "Individual Brokerage": ["TICKER", "TICKER"],
+    "Roth IRA": ["TICKER"],
+    "Roth 401k": "e.g. 75% S&P 500 / 25% International",
+    "Cash": "e.g. HYSA",
+    "Crypto": ["TICKER"],
+    "Equity comp": "e.g. employer stock plan"
+  },
+  "researching": {
+    "A thesis you are working on": ["Company", "Company"]
+  },
+  "themes": [
+    "Name each macro theme you want tracked — one card renders per theme"
+  ]
+}

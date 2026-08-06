@@ -1,0 +1,169 @@
+/* Macro Tracker — design tokens as specified.
+   Status colors carry meaning, so they are never used decoratively. */
+:root {
+  --bg:      #0a0a0f;
+  --card:    #111118;
+  --border:  #2a2a3a;
+  --text:    #e8e8f0;
+  --muted:   #6b6b80;
+
+  --green:   #00e676;
+  --yellow:  #ffd740;
+  --red:     #ff5252;
+  --orange:  #ff9100;
+  --blue:    #448aff;
+
+  --head: 'Bebas Neue', system-ui, sans-serif;
+  --body: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+
+/* ── header ─────────────────────────────────────────────────────────── */
+.masthead {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px; margin-bottom: 28px;
+}
+.masthead h1 {
+  font-family: var(--head); font-size: 44px; font-weight: 400;
+  letter-spacing: 2px; margin: 0; line-height: 1;
+}
+.masthead .date {
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  margin-top: 6px; letter-spacing: 0.5px;
+}
+
+.snapshot { display: flex; gap: 10px; flex-wrap: wrap; }
+.tick {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 16px; min-width: 132px;
+}
+.tick .k {
+  font-family: var(--body); font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.2px;
+}
+.tick .v {
+  font-family: var(--mono); font-size: 20px; font-weight: 500;
+  margin-top: 3px; letter-spacing: -0.5px;
+}
+.tick .d { font-family: var(--mono); font-size: 12px; margin-top: 1px; }
+.up   { color: var(--green); }
+.down { color: var(--red); }
+.flat { color: var(--muted); }
+
+/* ── macro strip ────────────────────────────────────────────────────── */
+.strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px; margin-bottom: 32px;
+}
+.strip .tick { min-width: 0; }
+.tick .asof {
+  font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px;
+}
+
+/* ── theme cards ────────────────────────────────────────────────────── */
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 18px;
+}
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--s, var(--border));
+  border-radius: 10px;
+  padding: 20px 22px 22px;
+}
+.card h2 {
+  font-family: var(--head); font-size: 25px; font-weight: 400;
+  letter-spacing: 1.4px; margin: 0; line-height: 1.1;
+}
+.card-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+
+.badge {
+  font-family: var(--body); font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  padding: 5px 11px; border-radius: 20px; white-space: nowrap;
+  color: var(--s);
+  background: color-mix(in srgb, var(--s) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--s) 25%, transparent);
+}
+
+.lbl {
+  font-family: var(--body); font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  margin: 18px 0 8px;
+}
+.changed { font-size: 14px; line-height: 1.65; }
+
+/* data points */
+.dp { border-top: 1px solid var(--border); padding: 9px 0; }
+.dp:last-child { padding-bottom: 0; }
+.dp-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.dp-k { font-size: 13px; color: var(--text); }
+.dp-v { font-family: var(--mono); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.dp-d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.dp-s { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+/* portfolio impact */
+.pi { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); }
+.pi-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 7px; flex: 0 0 auto; }
+.pi-h { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.pi-r { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+.watch {
+  margin-top: 16px; padding: 12px 14px; border-radius: 7px;
+  background: color-mix(in srgb, var(--s) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--s) 25%, transparent);
+  font-size: 13px; line-height: 1.55;
+}
+.watch b {
+  font-family: var(--body); font-size: 10px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--s); display: block; margin-bottom: 4px;
+}
+
+.empty { color: var(--muted); font-size: 13px; font-style: italic; }
+
+/* ── catalysts ──────────────────────────────────────────────────────── */
+.cat { margin-top: 22px; --s: var(--blue); }
+.cat-row {
+  display: grid; grid-template-columns: 108px 1fr; gap: 16px;
+  padding: 12px 0; border-top: 1px solid var(--border); align-items: start;
+}
+@media (max-width: 560px) { .cat-row { grid-template-columns: 1fr; gap: 3px; } }
+.cat-d { font-family: var(--mono); font-size: 12.5px; color: var(--blue); }
+.cat-l { font-size: 14px; font-weight: 500; }
+.cat-w { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+.days {
+  font-family: var(--mono); font-size: 10px; color: var(--muted); display: block;
+}
+
+footer {
+  margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8;
+}
+.err {
+  --s: var(--red); margin-bottom: 20px; padding: 12px 14px; border-radius: 7px;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+  font-family: var(--mono); font-size: 12px; color: var(--red);
+}

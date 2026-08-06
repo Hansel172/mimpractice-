@@ -1,0 +1,53 @@
+name: Macro Tracker Refresh
+
+on:
+  schedule:
+    # 11:12 UTC ≈ 7:12am ET. Off the hour deliberately — GitHub delays
+    # scheduled jobs most heavily at :00, and FRED publishes on the hour.
+    - cron: '12 11 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install httpx
+
+      # themes.json is gitignored (it holds portfolio detail), so the runner
+      # won't have it. Carry forward whatever is already published rather than
+      # wiping the analysis every time the numbers refresh.
+      - name: Restore analysis from the published copy
+        run: |
+          mkdir -p macro-tracker/data
+          if [ -f docs/macro/data.json ]; then
+            python3 -c "import json,pathlib; d=json.load(open('docs/macro/data.json')); pathlib.Path('macro-tracker/data/themes.json').write_text(json.dumps(d.get('themes',{}),indent=2))"
+            echo "carried forward existing analysis"
+          fi
+
+      - name: Refresh numbers
+        run: python3 macro-tracker/scripts/refresh.py
+
+      - name: Build public copy
+        run: python3 macro-tracker/scripts/build_public.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain docs/macro)" ]; then
+            git add docs/macro
+            git commit -m "Macro refresh $(date -u +%Y-%m-%d)"
+            git push
+            echo "pushed"
+          else
+            echo "no change"
+          fi
