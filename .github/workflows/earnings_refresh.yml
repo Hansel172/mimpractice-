@@ -1,0 +1,44 @@
+name: Earnings Tracker Refresh
+
+on:
+  schedule:
+    # 21:07 UTC ≈ 5pm ET, after market close — new SEC filings are typically
+    # processed by then. Off the hour deliberately, same reasoning as the
+    # macro tracker: scheduled jobs queue up worst right at :00.
+    - cron: '7 21 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install httpx
+
+      # Unlike the macro tracker, there's no separate judgment layer to
+      # carry forward here — every good/bad/ugly/red-flag call is computed
+      # mechanically by analyzer.py from SEC and Nasdaq data. A clean
+      # checkout can rebuild the whole thing from scratch every time.
+      - name: Build public app
+        run: python3 earnings-tracker/scripts/build_public.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain docs/earnings)" ]; then
+            git add docs/earnings
+            git commit -m "Earnings refresh $(date -u +%Y-%m-%d)"
+            git push
+            echo "pushed"
+          else
+            echo "no change"
+          fi

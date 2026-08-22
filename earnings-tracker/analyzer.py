@@ -1,0 +1,97 @@
+"""The comparison logic shared by the terminal report and the web app.
+
+Kept separate from earnings_tracker.py so both the CLI and the public page
+(built by build_public.py) call the exact same computation — otherwise the
+two could quietly drift apart as one gets edited and the other doesn't.
+This function only computes; nothing here prints or writes a file.
+"""
+
+from datetime import date
+
+from red_flag_detector import detect_red_flags
+
+
+def _pct_change(new, old):
+    if old in (None, 0) or new is None:
+        return None
+    return (new - old) / abs(old) * 100
+
+
+def _classify_metric(name, change, good_is_positive=True, ugly_threshold=None):
+    """Sorts one metric's change into good / bad / ugly. `ugly_threshold` is
+    the magnitude past which a bad number becomes an alarming one."""
+    if change is None:
+        return None
+    is_good = (change > 0) if good_is_positive else (change < 0)
+    if is_good:
+        return ("good", name, change)
+    if ugly_threshold is not None and abs(change) >= ugly_threshold:
+        return ("ugly", name, change)
+    return ("bad", name, change)
+
+
+def build_analysis(ticker, quarters):
+    """One ticker's latest-quarter-vs-baseline comparison.
+
+    Returns a dict with `insufficient_data: True` if there's nothing to
+    compare yet (fewer than 2 stored quarters) — the caller decides how to
+    present that, this function never assumes a particular output format.
+    """
+    if len(quarters) < 2:
+        return {"ticker": ticker, "insufficient_data": True,
+                "quarters_available": len(quarters)}
+
+    cur, prev = quarters[0], quarters[1]
+    gap_days = (date.fromisoformat(cur["period_end"]) - date.fromisoformat(prev["period_end"])).days
+    is_quarterly = gap_days <= 100
+
+    good, bad, ugly = [], [], []
+
+    def _bucket(item):
+        if item is None:
+            return
+        kind, name, change = item
+        (good if kind == "good" else bad if kind == "bad" else ugly).append(
+            {"metric": name, "change_pct": round(change, 1)})
+
+    for label, key, ugly_at in [
+        ("Revenue growth", "revenue", 10),
+        ("Net income",     "net_income", 20),
+        ("EPS (diluted)",  "eps_diluted", 20),
+        ("Free cash flow", "free_cash_flow", None),
+        ("Cash on hand",   "cash", 20),
+    ]:
+        chg = _pct_change(cur.get(key), prev.get(key))
+        label_out = label
+        # A shrinking loss is a real improvement, but "+46%" alone reads as
+        # unambiguous success — so a still-negative figure is called out
+        # even when the direction of change is favorable.
+        if key in ("net_income", "free_cash_flow") and cur.get(key) is not None and cur[key] < 0:
+            label_out = f"{label} (still negative, but improving)" if chg and chg > 0 else f"{label} (still negative)"
+        _bucket(_classify_metric(label_out, chg, good_is_positive=True, ugly_threshold=ugly_at))
+
+    # Debt: shrinking or flat is good; growing is bad. >15% matches the
+    # red-flag detector's own threshold, so it lands in the same bucket here.
+    debt_chg = _pct_change(cur.get("debt"), prev.get("debt"))
+    _bucket(_classify_metric("Debt", debt_chg, good_is_positive=False, ugly_threshold=15))
+
+    # Gross margin: percentage-point change, not percent change of a percent.
+    gm_cur, gm_prev = cur.get("gross_margin_pct"), prev.get("gross_margin_pct")
+    if gm_cur is not None and gm_prev is not None:
+        pts = round(gm_cur - gm_prev, 1)
+        entry = {"metric": "Gross margin", "change_pts": pts,
+                 "from_pct": gm_prev, "to_pct": gm_cur}
+        (good if pts > 0 else ugly if pts <= -2 else bad).append(entry)
+
+    return {
+        "ticker": ticker,
+        "insufficient_data": False,
+        "period_end": cur["period_end"],
+        "compared_to": prev["period_end"],
+        "gap_days": gap_days,
+        "is_quarterly_comparison": is_quarterly,
+        "good": good,
+        "bad": bad,
+        "ugly": ugly,
+        "red_flags": detect_red_flags(quarters),
+    }

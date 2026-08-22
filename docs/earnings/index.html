@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earnings Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Earnings Tracker</h1>
+      <div class="sub">The good, the bad, the ugly — for every company you follow</div>
+    </div>
+    <button class="share-btn" id="share" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>
+        <polyline points="16 6 12 2 8 6"/>
+        <line x1="12" y1="2" x2="12" y2="15"/>
+      </svg>
+      Share
+    </button>
+  </header>
+
+  <div class="grid" id="grid">
+    <div class="error-card">Loading&hellip;</div>
+  </div>
+
+  <footer>
+    Data from SEC EDGAR and Nasdaq's public earnings calendar. No API key, no personal data.<br>
+    Not financial advice.
+  </footer>
+
+</div>
+
+<div class="share-toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

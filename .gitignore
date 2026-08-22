@@ -136,3 +136,8 @@ macro-tracker/data/live.json
 macro-tracker/data/themes.json
 macro-tracker/data/bundle.js
 macro-tracker/profile.example.json.bak
+
+# earnings-tracker — watchlist reflects personal research interests
+earnings-tracker/watchlist_data/*.json
+!earnings-tracker/watchlist_data/.gitkeep
+/.playwright-mcp/
