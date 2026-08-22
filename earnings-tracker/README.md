@@ -1,0 +1,100 @@
+# Earnings Tracker
+
+Tracks earnings for companies you follow, and flags things worth a second
+look when a new quarter comes in.
+
+**No API key.** Everything comes from SEC EDGAR (the companies' own filings)
+and Nasdaq's public earnings calendar — both free, no signup.
+
+## Setup
+
+```bash
+cd earnings-tracker
+pip install -r requirements.txt
+```
+
+## The four commands
+
+**Add a company to your watchlist:**
+```bash
+python earnings_tracker.py add NVDA
+```
+Pulls 12 quarters of history and saves it to `watchlist_data/NVDA.json`.
+Run this once per company before analyzing it.
+
+**Analyze the latest quarter against the stored baseline:**
+```bash
+python earnings_tracker.py analyze NVDA
+```
+Prints a report in four sections — THE GOOD, THE BAD, THE UGLY, and RED
+FLAGS — comparing the most recent quarter to the one before it.
+
+**See who's reporting soon:**
+```bash
+python earnings_tracker.py monitor
+```
+Checks the next 14 days against your whole watchlist.
+
+**Catch up on anyone who just reported:**
+```bash
+python earnings_tracker.py report
+```
+Finds anyone on your watchlist who reported in the last 7 days, refreshes
+their data, and runs the full analysis on each.
+
+## What counts as a red flag
+
+- Gross margin down more than 2 points quarter over quarter
+- Operating expenses growing faster than revenue for two straight quarters
+- Free cash flow flipping negative after being positive
+- Net income falling while revenue is still growing
+- Cash dropping more than 20% in one quarter (worse if debt rose at the same time)
+- Debt rising more than 15% in one quarter
+
+## What this can't do
+
+**No forward guidance.** SEC filings report what already happened, not what
+a company says will happen next quarter — that lives in earnings calls and
+press releases, not the financial statements this tool reads. `analyze`
+does show the analyst consensus beat/miss when Nasdaq's calendar has it,
+which is the closest available substitute.
+
+**Large, established US companies work best.** SEC's XBRL data is cleanest
+for big filers. Very small companies, foreign private issuers, and some
+ETFs/trusts don't tag their financials the same way and may come back
+mostly empty — `add` will tell you plainly if that happens rather than
+guessing.
+
+## Two things worth knowing about how the numbers are built
+
+**Q4 is derived, not filed directly.** Companies almost never file a
+standalone fourth-quarter report — only the full year, in the 10-K. Q4 is
+calculated as `full year − Q1 − Q2 − Q3` wherever those three are already
+known. This works correctly for dollar figures (revenue, net income, cash
+flow) because they add up across quarters. It does **not** work for EPS,
+since EPS is a per-share ratio and share counts shift quarter to quarter —
+so a derived Q4's EPS is left blank rather than shown as a wrong number.
+
+**Tags can change over time.** Companies occasionally switch which SEC
+label they file a number under — Microsoft, for instance, reported revenue
+under `Revenues` only through 2010, then switched to a longer label
+(`RevenueFromContractWithCustomerExcludingAssessedTax`) from 2016 onward.
+This tool checks every common label for a concept and merges what it finds,
+so a company's older or newer filings are both counted rather than only
+whichever tag happens to be tried first.
+
+## Files
+
+| File | What it does |
+|---|---|
+| `earnings_tracker.py` | The CLI — the four commands above |
+| `sec_data.py` | Pulls and cleans data from SEC EDGAR and Nasdaq |
+| `red_flag_detector.py` | Scans a company's history for the six flags above |
+| `data_store.py` | Saves and loads each ticker's data as local JSON |
+| `watchlist_data/` | Where your tracked companies' data lives (not committed — see below) |
+
+## Privacy
+
+`watchlist_data/*.json` is gitignored. Your specific list of tracked
+companies reflects what you're researching, and this repo is public — the
+code is meant to be shared, your watchlist isn't.
