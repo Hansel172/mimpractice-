@@ -116,6 +116,25 @@ Unlike the CLI, there's no separate "judgment" step to keep in sync — every
 card is computed mechanically from SEC and Nasdaq data, so the Action can
 rebuild the whole page from a clean checkout every run.
 
+**Current watchlist:** NVDA, AAPL, MSFT, SPCX, MU, SNDK, WDC, STX. Edit
+`watchlist.txt` and re-run `build_public.py` to change it.
+
+## Email alerts
+
+You don't have to remember to open the app — an email goes out only when a
+tracked company actually reports a new quarter. Silent every other day.
+
+This reuses the same SendGrid setup as `morning_briefing.py` (one email
+pipeline, not two) and runs as part of the same scheduled Action that
+refreshes the app. Each run snapshots the previously-published data before
+rebuilding, then `send_alerts.py` compares old against new — a ticker whose
+latest quarter date changed gets an email; nothing else does.
+
+**To test it by hand:**
+```bash
+python earnings-tracker/scripts/send_alerts.py path/to/an/older/data.json
+```
+
 ## Files
 
 | File | What it does |
@@ -127,6 +146,7 @@ rebuild the whole page from a clean checkout every run.
 | `data_store.py` | Saves and loads each ticker's data as local JSON (CLI only) |
 | `watchlist.txt` | Which companies the *web app* shows — plain, public, committed |
 | `scripts/build_public.py` | Builds `docs/earnings/` from `watchlist.txt` |
+| `scripts/send_alerts.py` | Emails you only when someone new has reported |
 | `watchlist_data/` | Where the *CLI's* tracked companies' data lives (not committed — see below) |
 
 ## Privacy

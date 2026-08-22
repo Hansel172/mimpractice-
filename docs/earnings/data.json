@@ -168,6 +168,160 @@
       "bad": [],
       "ugly": [],
       "red_flags": []
+    },
+    {
+      "ticker": "MU",
+      "insufficient_data": false,
+      "period_end": "2026-05-28",
+      "compared_to": "2026-02-26",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 73.7
+        },
+        {
+          "metric": "Net income",
+          "change_pct": 104.9
+        },
+        {
+          "metric": "EPS (diluted)",
+          "change_pct": 104.4
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": 79.6
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 10.2,
+          "from_pct": 74.41,
+          "to_pct": 84.56
+        }
+      ],
+      "bad": [
+        {
+          "metric": "Debt",
+          "change_pct": 0.0
+        }
+      ],
+      "ugly": [],
+      "red_flags": []
+    },
+    {
+      "ticker": "SNDK",
+      "insufficient_data": false,
+      "period_end": "2026-07-03",
+      "compared_to": "2026-04-03",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 50.7
+        },
+        {
+          "metric": "Net income",
+          "change_pct": 91.0
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": 27.5
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 6.2,
+          "from_pct": 78.35,
+          "to_pct": 84.57
+        }
+      ],
+      "bad": [],
+      "ugly": [],
+      "red_flags": []
+    },
+    {
+      "ticker": "WDC",
+      "insufficient_data": false,
+      "period_end": "2026-07-03",
+      "compared_to": "2026-04-03",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 12.3
+        },
+        {
+          "metric": "Debt",
+          "change_pct": -33.5
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 3.9,
+          "from_pct": 50.22,
+          "to_pct": 54.12
+        }
+      ],
+      "bad": [
+        {
+          "metric": "Net income",
+          "change_pct": -0.3
+        }
+      ],
+      "ugly": [
+        {
+          "metric": "Cash on hand",
+          "change_pct": -23.0
+        }
+      ],
+      "red_flags": [
+        {
+          "flag": "Net income falling despite revenue growth",
+          "severity": "medium",
+          "detail": "Revenue rose 12.3% but net income fell 0.3%. Growth alone doesn't tell the whole story here \u2014 costs are eating more of each new dollar of sales."
+        },
+        {
+          "flag": "Cash reserves dropped sharply",
+          "severity": "medium",
+          "detail": "Cash and equivalents fell 23.0% in one quarter."
+        }
+      ]
+    },
+    {
+      "ticker": "STX",
+      "insufficient_data": false,
+      "period_end": "2026-07-03",
+      "compared_to": "2026-04-03",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 16.6
+        },
+        {
+          "metric": "Net income",
+          "change_pct": 73.0
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": 48.6
+        },
+        {
+          "metric": "Debt",
+          "change_pct": -2.5
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 5.8,
+          "from_pct": 46.5,
+          "to_pct": 52.3
+        }
+      ],
+      "bad": [],
+      "ugly": [],
+      "red_flags": []
     }
   ]
 }
