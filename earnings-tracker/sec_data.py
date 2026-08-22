@@ -184,6 +184,8 @@ def _instant_series(cik, tags):
     by_end = {}
     for tag in tags:
         entries = _fetch_concept(cik, tag, "USD")
+        if not entries:
+            continue
         for u in entries:
             end = u.get("end")
             if not end:

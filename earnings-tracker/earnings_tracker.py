@@ -14,19 +14,7 @@ import sys
 
 import data_store
 import sec_data
-from red_flag_detector import detect_red_flags
-
-
-def _pct_change(new, old):
-    if old in (None, 0) or new is None:
-        return None
-    return (new - old) / abs(old) * 100
-
-
-def _fmt_money(v):
-    if v is None:
-        return "n/a"
-    return f"${v:,.0f}"
+from analyzer import build_analysis
 
 
 def _fmt_pct(v, signed=True):
@@ -66,21 +54,16 @@ def cmd_add(ticker):
 
 
 # ── analyze ──────────────────────────────────────────────────────────────
-def _classify_metric(name, change, good_is_positive=True, ugly_threshold=None):
-    """Sorts one metric's change into good / bad / ugly for the summary
-    sections. `ugly_threshold` is the magnitude (in the same units as
-    `change`) past which a bad number becomes an alarming one."""
-    if change is None:
-        return None
-    is_good = (change > 0) if good_is_positive else (change < 0)
-    if is_good:
-        return ("good", f"{name}: {_fmt_pct(change)}")
-    if ugly_threshold is not None and abs(change) >= ugly_threshold:
-        return ("ugly", f"{name}: {_fmt_pct(change)}")
-    return ("bad", f"{name}: {_fmt_pct(change)}")
+def _fmt_metric_line(m):
+    if "change_pts" in m:
+        return f"{m['metric']}: {m['change_pts']:+.1f} points ({m['from_pct']:.1f}% -> {m['to_pct']:.1f}%)"
+    return f"{m['metric']}: {_fmt_pct(m['change_pct'])}"
 
 
 def cmd_analyze(ticker):
+    """Prints the terminal report. All the actual comparison logic lives in
+    analyzer.build_analysis() so the CLI and the public web page (built by
+    build_public.py) can never quietly drift apart from each other."""
     ticker = ticker.upper()
     stored = data_store.load_ticker(ticker)
     if not stored:
@@ -89,76 +72,50 @@ def cmd_analyze(ticker):
         return
 
     quarters = stored["quarters"]
-    if len(quarters) < 2:
-        print(f"Only {len(quarters)} quarter(s) stored for {ticker} — need at "
-              f"least 2 to compare. Try again after the next earnings report.")
+    result = build_analysis(ticker, quarters)
+
+    if result["insufficient_data"]:
+        n = result["quarters_available"]
+        print(f"Only {n} quarter(s) stored for {ticker} — need at least 2 to "
+              f"compare. Try again after the next earnings report.")
         return
 
-    cur, prev = quarters[0], quarters[1]
-    good, bad, ugly = [], [], []
-
-    for label, key, ugly_at in [
-        ("Revenue growth", "revenue", 10),
-        ("Gross margin",   None, None),   # handled separately — it's already a % change
-        ("Net income",     "net_income", 20),
-        ("EPS (diluted)",  "eps_diluted", 20),
-        ("Free cash flow", "free_cash_flow", None),
-        ("Cash on hand",   "cash", 20),
-    ]:
-        if key is None:
-            continue
-        chg = _pct_change(cur.get(key), prev.get(key))
-        # Debt and cash read "good" in opposite directions from growth metrics.
-        good_dir = key != "debt"
-        result = _classify_metric(label, chg, good_is_positive=good_dir, ugly_threshold=ugly_at)
-        if result:
-            (good if result[0] == "good" else bad if result[0] == "bad" else ugly).append(result[1])
-
-    # Debt: shrinking or flat is good; growing is bad, and >15% is the same
-    # threshold the red-flag detector uses, so it lands in the same bucket here.
-    debt_chg = _pct_change(cur.get("debt"), prev.get("debt"))
-    if debt_chg is not None:
-        result = _classify_metric("Debt", debt_chg, good_is_positive=False, ugly_threshold=15)
-        (good if result[0] == "good" else bad if result[0] == "bad" else ugly).append(result[1])
-
-    # Gross margin: compare percentage-point change, not percent change of a percent.
-    gm_cur, gm_prev = cur.get("gross_margin_pct"), prev.get("gross_margin_pct")
-    if gm_cur is not None and gm_prev is not None:
-        pts = gm_cur - gm_prev
-        line = f"Gross margin: {pts:+.1f} points ({gm_prev:.1f}% -> {gm_cur:.1f}%)"
-        bucket = "good" if pts > 0 else "ugly" if pts <= -2 else "bad"
-        (good if bucket == "good" else bad if bucket == "bad" else ugly).append(line)
-
-    flags = detect_red_flags(quarters)
+    if not result["is_quarterly_comparison"]:
+        months = round(result["gap_days"] / 30.4)
+        print(f"\nNOTE: only {len(quarters)} usable quarter(s) exist for {ticker} in SEC's "
+              f"data — common for a recently-public company. The comparison below spans "
+              f"{result['gap_days']} days (~{months} months), not one quarter, so treat "
+              f"these as longer-term changes, not quarter-over-quarter ones.")
 
     print(f"\n{'=' * 60}")
     print(f"  EARNINGS ANALYSIS — {ticker}")
-    print(f"  Quarter ending {cur['period_end']}  (vs. {prev['period_end']})")
+    print(f"  Quarter ending {result['period_end']}  (vs. {result['compared_to']})")
     print(f"{'=' * 60}")
 
     print(f"\nTHE GOOD")
     print("-" * 40)
-    for line in good:
-        print(f"  + {line}")
-    if not good:
+    for m in result["good"]:
+        print(f"  + {_fmt_metric_line(m)}")
+    if not result["good"]:
         print("  (nothing stood out this quarter)")
 
     print(f"\nTHE BAD")
     print("-" * 40)
-    for line in bad:
-        print(f"  - {line}")
-    if not bad:
+    for m in result["bad"]:
+        print(f"  - {_fmt_metric_line(m)}")
+    if not result["bad"]:
         print("  (nothing here)")
 
     print(f"\nTHE UGLY")
     print("-" * 40)
-    for line in ugly:
-        print(f"  ! {line}")
-    if not ugly:
+    for m in result["ugly"]:
+        print(f"  ! {_fmt_metric_line(m)}")
+    if not result["ugly"]:
         print("  (nothing alarming)")
 
     print(f"\nRED FLAGS")
     print("-" * 40)
+    flags = result["red_flags"]
     if not flags:
         print("  None detected.")
     else:
@@ -169,7 +126,7 @@ def cmd_analyze(ticker):
     # Best-effort: did this quarter beat or miss consensus? Nasdaq's calendar
     # is keyed by report date, which isn't always exactly the period end, so
     # this is informational and silently skipped if it can't be matched.
-    surprise = sec_data.get_earnings_surprise(ticker, cur["period_end"])
+    surprise = sec_data.get_earnings_surprise(ticker, result["period_end"])
     if surprise and surprise.get("eps"):
         print(f"\nANALYST REACTION (Nasdaq)")
         print("-" * 40)

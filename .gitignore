@@ -140,3 +140,4 @@ macro-tracker/profile.example.json.bak
 # earnings-tracker — watchlist reflects personal research interests
 earnings-tracker/watchlist_data/*.json
 !earnings-tracker/watchlist_data/.gitkeep
+/.playwright-mcp/

@@ -1,0 +1,6 @@
+# One ticker per line. Lines starting with # are ignored.
+# Edit this file and re-run scripts/build_public.py to update the app.
+NVDA
+AAPL
+MSFT
+SPCX

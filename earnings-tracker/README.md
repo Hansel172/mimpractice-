@@ -83,18 +83,60 @@ This tool checks every common label for a concept and merges what it finds,
 so a company's older or newer filings are both counted rather than only
 whichever tag happens to be tried first.
 
+## The mobile app
+
+There's also a real page — the same analysis, but as something you open on
+your phone rather than the terminal. It lives at `docs/earnings/` and
+publishes to GitHub Pages, refreshed automatically on weekdays after market
+close by `.github/workflows/earnings_refresh.yml`.
+
+**Which companies show up** is controlled by `watchlist.txt` (one ticker per
+line) — a different, deliberately public list from the CLI's own
+`watchlist_data/` (see Privacy below).
+
+**To rebuild it by hand:**
+```bash
+python earnings-tracker/scripts/build_public.py
+```
+This reads `watchlist.txt`, runs the exact same comparison logic the CLI
+uses (`analyzer.py` — one shared function, so the phone app and the terminal
+report can never quietly disagree with each other), and writes
+`docs/earnings/data.json`.
+
+**Add to your home screen:** open the page in Safari or Chrome, then use
+"Add to Home Screen." It gets its own icon and opens full-screen, no browser
+chrome — same as a normal app. It also works offline, showing whatever was
+last loaded.
+
+**Share button:** uses your phone's native share sheet (the same one every
+app uses) to send the link via Messages, Mail, or anywhere else. Falls back
+to copying the link on a browser that doesn't support it.
+
+Unlike the CLI, there's no separate "judgment" step to keep in sync — every
+card is computed mechanically from SEC and Nasdaq data, so the Action can
+rebuild the whole page from a clean checkout every run.
+
 ## Files
 
 | File | What it does |
 |---|---|
 | `earnings_tracker.py` | The CLI — the four commands above |
+| `analyzer.py` | The comparison logic itself — shared by the CLI and the web app |
 | `sec_data.py` | Pulls and cleans data from SEC EDGAR and Nasdaq |
 | `red_flag_detector.py` | Scans a company's history for the six flags above |
-| `data_store.py` | Saves and loads each ticker's data as local JSON |
-| `watchlist_data/` | Where your tracked companies' data lives (not committed — see below) |
+| `data_store.py` | Saves and loads each ticker's data as local JSON (CLI only) |
+| `watchlist.txt` | Which companies the *web app* shows — plain, public, committed |
+| `scripts/build_public.py` | Builds `docs/earnings/` from `watchlist.txt` |
+| `watchlist_data/` | Where the *CLI's* tracked companies' data lives (not committed — see below) |
 
 ## Privacy
 
-`watchlist_data/*.json` is gitignored. Your specific list of tracked
-companies reflects what you're researching, and this repo is public — the
-code is meant to be shared, your watchlist isn't.
+Two different watchlists, two different rules, on purpose:
+
+- **`watchlist_data/*.json`** (the CLI) is gitignored. This is your personal,
+  ad hoc research list — whatever you've typed `add TICKER` for — and it's
+  nobody's business but yours.
+- **`watchlist.txt`** (the web app) is committed and public by design. It's
+  a short, deliberate list you chose to publish, and the app itself only
+  ever displays public company financials — no personal or account
+  information touches it at all, so there's nothing to redact.

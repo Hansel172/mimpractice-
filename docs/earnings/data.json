@@ -1,0 +1,173 @@
+{
+  "companies": [
+    {
+      "ticker": "NVDA",
+      "insufficient_data": false,
+      "period_end": "2026-04-26",
+      "compared_to": "2026-01-25",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 19.8
+        },
+        {
+          "metric": "Net income",
+          "change_pct": 35.8
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": 24.8
+        }
+      ],
+      "bad": [
+        {
+          "metric": "Debt",
+          "change_pct": 0.0
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": -0.1,
+          "from_pct": 75.0,
+          "to_pct": 74.93
+        }
+      ],
+      "ugly": [],
+      "red_flags": []
+    },
+    {
+      "ticker": "AAPL",
+      "insufficient_data": false,
+      "period_end": "2026-06-27",
+      "compared_to": "2026-03-28",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Net income",
+          "change_pct": 0.7
+        },
+        {
+          "metric": "EPS (diluted)",
+          "change_pct": 0.5
+        },
+        {
+          "metric": "Debt",
+          "change_pct": -0.5
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 0.8,
+          "from_pct": 49.27,
+          "to_pct": 50.06
+        }
+      ],
+      "bad": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": -1.6
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": -13.2
+        }
+      ],
+      "ugly": [],
+      "red_flags": [
+        {
+          "flag": "Operating expenses outgrowing revenue",
+          "severity": "medium",
+          "detail": "For two straight quarters, operating costs have grown faster than revenue (most recent: opex +0.9% vs. revenue -1.6%). If this continues, profitability erodes even while the top line still grows."
+        }
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "insufficient_data": false,
+      "period_end": "2026-06-30",
+      "compared_to": "2026-03-31",
+      "gap_days": 91,
+      "is_quarterly_comparison": true,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 8.6
+        },
+        {
+          "metric": "Net income",
+          "change_pct": 12.5
+        },
+        {
+          "metric": "Free cash flow",
+          "change_pct": 24.3
+        }
+      ],
+      "bad": [
+        {
+          "metric": "Debt",
+          "change_pct": 0.1
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": -0.4,
+          "from_pct": 67.63,
+          "to_pct": 67.2
+        }
+      ],
+      "ugly": [
+        {
+          "metric": "Cash on hand",
+          "change_pct": -34.8
+        }
+      ],
+      "red_flags": [
+        {
+          "flag": "Operating expenses outgrowing revenue",
+          "severity": "medium",
+          "detail": "For two straight quarters, operating costs have grown faster than revenue (most recent: opex +12.6% vs. revenue +8.6%). If this continues, profitability erodes even while the top line still grows."
+        },
+        {
+          "flag": "Cash reserves dropped sharply",
+          "severity": "high",
+          "detail": "Cash and equivalents fell 34.8% in one quarter. Debt rose 0.1% in the same period \u2014 spending down cash while also borrowing more is worth a closer look."
+        }
+      ]
+    },
+    {
+      "ticker": "SPCX",
+      "insufficient_data": false,
+      "period_end": "2026-06-30",
+      "compared_to": "2025-06-30",
+      "gap_days": 365,
+      "is_quarterly_comparison": false,
+      "good": [
+        {
+          "metric": "Revenue growth",
+          "change_pct": 91.9
+        },
+        {
+          "metric": "Net income (still negative, but improving)",
+          "change_pct": 46.3
+        },
+        {
+          "metric": "EPS (diluted)",
+          "change_pct": 73.5
+        },
+        {
+          "metric": "Cash on hand",
+          "change_pct": 525.1
+        },
+        {
+          "metric": "Gross margin",
+          "change_pts": 11.3,
+          "from_pct": 43.94,
+          "to_pct": 55.27
+        }
+      ],
+      "bad": [],
+      "ugly": [],
+      "red_flags": []
+    }
+  ]
+}

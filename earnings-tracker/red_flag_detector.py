@@ -56,8 +56,8 @@ def detect_red_flags(quarters):
                 "flag": "Operating expenses outgrowing revenue",
                 "severity": "medium",
                 "detail": (f"For two straight quarters, operating costs have grown faster "
-                           f"than revenue (most recent: opex +{opex_g1:.1f}% vs. revenue "
-                           f"+{rev_g1:.1f}%). If this continues, profitability erodes even "
+                           f"than revenue (most recent: opex {opex_g1:+.1f}% vs. revenue "
+                           f"{rev_g1:+.1f}%). If this continues, profitability erodes even "
                            f"while the top line still grows."),
             })
 
