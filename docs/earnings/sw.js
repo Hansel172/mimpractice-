@@ -1,4 +1,12 @@
-const SHELL = 'earnings-shell-v1';
+// v2: the shell files (app.js, styles.css, index.html) were cache-first,
+// which meant a code change never reached an already-installed phone until
+// the SW file itself changed — nothing forces a browser to re-check a
+// service worker otherwise. Caught when a UI update (business descriptions)
+// shipped but stayed invisible on an already-installed copy. Now
+// network-first everywhere, same as data.json already was: try live first,
+// fall back to cache only when offline. The cache name bump below is also
+// required — it's what makes the browser notice this file changed at all.
+const SHELL = 'earnings-shell-v2';
 const FILES = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest'];
 
 self.addEventListener('install', e => {
@@ -12,15 +20,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  if (url.pathname.endsWith('data.json')) {
-    // Network-first for data so a refresh always tries live before cache.
-    e.respondWith(fetch(e.request)
-      .then(r => { const copy = r.clone();
-        caches.open(SHELL).then(c => c.put('data.json', copy)); return r; })
-      .catch(() => caches.match('data.json')));
-    return;
-  }
-  // Cache-first for the shell so it opens instantly and works offline.
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+  e.respondWith(
+    fetch(e.request)
+      .then(r => {
+        const copy = r.clone();
+        caches.open(SHELL).then(c => c.put(e.request, copy));
+        return r;
+      })
+      .catch(() => caches.match(e.request))
+  );
 });
