@@ -83,6 +83,9 @@ body {
 .card .period {
   font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 3px;
 }
+.card .desc {
+  font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5;
+}
 
 .badge {
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.1px;

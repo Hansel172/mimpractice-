@@ -51,13 +51,19 @@ function statusFor(company) {
   return { color: 'var(--green)', label: 'Clean' };
 }
 
+function descLine(description) {
+  return description ? `<div class="desc">${esc(description)}</div>` : '';
+}
+
 function companyCard(company) {
   if (company.error) {
     return `<section class="card"><div class="card-head"><h2>${esc(company.ticker)}</h2></div>
+      ${descLine(company.description)}
       <div class="error-card">${esc(company.error)}</div></section>`;
   }
   if (company.insufficient_data) {
     return `<section class="card"><div class="card-head"><h2>${esc(company.ticker)}</h2></div>
+      ${descLine(company.description)}
       <div class="error-card">Only ${company.quarters_available} quarter(s) available — need at least 2 to compare.</div></section>`;
   }
 
@@ -82,6 +88,7 @@ function companyCard(company) {
       </div>
       <span class="badge">${s.label}</span>
     </div>
+    ${descLine(company.description)}
     ${gapNote}
     <div class="cols">
       ${column('The Good', company.good, 'good')}
