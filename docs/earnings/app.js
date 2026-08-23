@@ -55,6 +55,97 @@ function descLine(description) {
   return description ? `<div class="desc">${esc(description)}</div>` : '';
 }
 
+function fmtMoneyShort(v) {
+  if (v === null || v === undefined) return 'n/a';
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return `$${(v / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
+  return `$${v.toLocaleString()}`;
+}
+
+/* Placeholder only — the real SVG is drawn by drawSparklines() once this
+   is actually laid out in the DOM. clientWidth is 0 before that, and a
+   viewBox stretched to fit an assumed width (rather than the real one)
+   scales X and Y unevenly, which turns the endpoint dot into an ellipse.
+   Building it at the container's true pixel width keeps a 1:1 scale, so
+   the circle stays a circle regardless of how wide the card ends up. */
+function sparklineContainer(points, accentColor) {
+  if (points.length < 2) return '';
+  const values = points.map(p => p.revenue);
+  return `<div class="spark-wrap">
+    <div class="spark" data-values="${esc(JSON.stringify(values))}" data-accent="${esc(accentColor)}"></div>
+    <div class="spark-caption">
+      <span>Revenue &middot; ${points.length} quarters</span>
+      <span>${fmtMoneyShort(values[values.length - 1])}</span>
+    </div>
+  </div>`;
+}
+
+function drawSparklines() {
+  document.querySelectorAll('.spark').forEach(el => {
+    const W = el.clientWidth;
+    if (!W) return; // not laid out yet — a later resize/redraw will catch it
+    const values = JSON.parse(el.dataset.values);
+    const accent = el.dataset.accent;
+    const H = 40, PAD_X = 4, PAD_Y = 6;
+    const min = Math.min(...values), max = Math.max(...values);
+    const range = max - min || 1;
+    const stepX = values.length > 1 ? (W - PAD_X * 2) / (values.length - 1) : 0;
+
+    const coords = values.map((v, i) => [
+      PAD_X + i * stepX,
+      PAD_Y + (H - PAD_Y * 2) * (1 - (v - min) / range),
+    ]);
+    const d = coords.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const [lastX, lastY] = coords[coords.length - 1];
+
+    // viewBox width == W == the SVG's own pixel width, so scaleX == scaleY
+    // == 1 — nothing here gets stretched non-uniformly.
+    el.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img"
+           aria-label="Revenue trend, ${fmtMoneyShort(values[0])} to ${fmtMoneyShort(values[values.length - 1])} over ${values.length} quarters">
+        <path d="${d}" fill="none" stroke="var(--muted)" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="5"
+                fill="${accent}" stroke="var(--card)" stroke-width="2"/>
+      </svg>`;
+  });
+}
+
+function streakNotes(trend) {
+  const lines = [];
+  // Only surface a streak once it's genuinely more informative than the
+  // single quarter-over-quarter comparison already shown elsewhere on the
+  // card — "grew for 2 quarters" says the same thing "up this quarter" does.
+  if (trend.revenue_growth_streak >= 3) {
+    lines.push(`Revenue has grown for ${trend.revenue_growth_streak} straight quarters.`);
+  }
+  if (trend.margin_expansion_streak >= 3) {
+    lines.push(`Gross margin has expanded for ${trend.margin_expansion_streak} straight quarters.`);
+  }
+  return lines.length
+    ? `<div class="streaks">${lines.map(l => `<div>${esc(l)}</div>`).join('')}</div>`
+    : '';
+}
+
+function quartersTable(rows) {
+  const body = rows.map(r => `
+    <tr>
+      <td>${esc(r.period_end)}</td>
+      <td class="num">${r.revenue != null ? fmtMoneyShort(r.revenue) : 'n/a'}</td>
+      <td class="num">${r.gross_margin_pct != null ? r.gross_margin_pct.toFixed(1) + '%' : 'n/a'}</td>
+      <td class="num">${r.eps_diluted != null ? r.eps_diluted.toFixed(2) : 'n/a'}</td>
+    </tr>`).join('');
+  return `
+  <details class="qtable">
+    <summary>Show all ${rows.length} quarters</summary>
+    <table>
+      <thead><tr><th>Quarter</th><th class="num">Revenue</th><th class="num">Gross margin</th><th class="num">EPS</th></tr></thead>
+      <tbody>${body}</tbody>
+    </table>
+  </details>`;
+}
+
 function companyCard(company) {
   if (company.error) {
     return `<section class="card"><div class="card-head"><h2>${esc(company.ticker)}</h2></div>
@@ -80,6 +171,8 @@ function companyCard(company) {
       + `Surprise ${esc(company.analyst_reaction.surprise)}</div>`
     : '';
 
+  const trend = company.trend || {};
+
   return `<section class="card" style="--s:${s.color}">
     <div class="card-head">
       <div>
@@ -90,6 +183,8 @@ function companyCard(company) {
     </div>
     ${descLine(company.description)}
     ${gapNote}
+    ${sparklineContainer(trend.revenue_points || [], s.color)}
+    ${streakNotes(trend)}
     <div class="cols">
       ${column('The Good', company.good, 'good')}
       ${column('The Bad', company.bad, 'bad')}
@@ -97,13 +192,21 @@ function companyCard(company) {
     </div>
     ${flagsBlock(company.red_flags)}
     ${reaction}
+    ${trend.quarters_table ? quartersTable(trend.quarters_table) : ''}
   </section>`;
 }
 
 function render(data) {
   document.getElementById('grid').innerHTML =
     (data.companies || []).map(companyCard).join('');
+  drawSparklines();
 }
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawSparklines, 150);
+});
 
 async function boot() {
   try {

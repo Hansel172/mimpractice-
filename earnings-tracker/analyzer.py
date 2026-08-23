@@ -30,12 +30,59 @@ def _classify_metric(name, change, good_is_positive=True, ugly_threshold=None):
     return ("bad", name, change)
 
 
-def build_analysis(ticker, quarters):
-    """One ticker's latest-quarter-vs-baseline comparison.
+def _streak(quarters, getter, better):
+    """How many consecutive quarters, walking backward from the most recent,
+    kept moving in the `better` direction versus the quarter before them.
+    Stops at the first break or the first missing value — a derived Q4's
+    blank EPS (see sec_data.py) should halt an EPS streak, not silently
+    skip over the gap and keep counting past it."""
+    count = 0
+    for i in range(len(quarters) - 1):
+        cur_v, prev_v = getter(quarters[i]), getter(quarters[i + 1])
+        if cur_v is None or prev_v is None:
+            break
+        if better(cur_v, prev_v):
+            count += 1
+        else:
+            break
+    return count
 
-    Returns a dict with `insufficient_data: True` if there's nothing to
-    compare yet (fewer than 2 stored quarters) — the caller decides how to
-    present that, this function never assumes a particular output format.
+
+def build_trend(quarters):
+    """Revenue history across every stored quarter (not just the latest
+    two), plus simple streak counts computed the same way. This is what
+    lets a card say "revenue has grown for 5 straight quarters" instead of
+    only ever comparing one quarter to the one before it."""
+    chronological = list(reversed(quarters))  # oldest -> newest, for a left-to-right sparkline
+    points = [
+        {"period_end": q["period_end"], "revenue": q["revenue"]}
+        for q in chronological if q.get("revenue") is not None
+    ]
+
+    return {
+        "revenue_points": points,
+        "revenue_growth_streak": _streak(
+            quarters, lambda q: q.get("revenue"), lambda c, p: c > p),
+        "margin_expansion_streak": _streak(
+            quarters, lambda q: q.get("gross_margin_pct"), lambda c, p: c > p),
+        "quarters_table": [
+            {
+                "period_end": q["period_end"],
+                "revenue": q.get("revenue"),
+                "gross_margin_pct": q.get("gross_margin_pct"),
+                "eps_diluted": q.get("eps_diluted"),
+            }
+            for q in quarters
+        ],
+    }
+
+
+def build_analysis(ticker, quarters):
+    """One ticker's latest-quarter-vs-baseline comparison, plus the full-
+    history trend from build_trend(). Returns a dict with
+    `insufficient_data: True` if there's nothing to compare yet (fewer than
+    2 stored quarters) — the caller decides how to present that, this
+    function never assumes a particular output format.
     """
     if len(quarters) < 2:
         return {"ticker": ticker, "insufficient_data": True,
@@ -94,4 +141,5 @@ def build_analysis(ticker, quarters):
         "bad": bad,
         "ugly": ugly,
         "red_flags": detect_red_flags(quarters),
+        "trend": build_trend(quarters),
     }
