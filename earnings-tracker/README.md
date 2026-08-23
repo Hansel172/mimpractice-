@@ -122,6 +122,21 @@ rebuild the whole page from a clean checkout every run.
 **Current watchlist:** NVDA, AAPL, MSFT, SPCX, MU, SNDK, WDC, STX. Edit
 `watchlist.txt` and re-run `build_public.py` to change it.
 
+### 12-quarter trend
+
+Each card also draws on the full stored history, not just the latest
+quarter versus the one before it:
+
+- A revenue sparkline across every quarter on file (up to 12), with the
+  most recent point marked in the card's status color.
+- A streak note when it's genuinely informative — "revenue has grown for
+  N straight quarters" only appears once N reaches 3, since anything less
+  just restates what the quarter-over-quarter comparison above it already
+  says.
+- "Show all N quarters" expands to the full revenue / gross margin / EPS
+  table. EPS reads `n/a` on a derived Q4 for the same reason it does
+  elsewhere in this tool — see "Q4 is derived, not filed directly" above.
+
 ## Email alerts
 
 You don't have to remember to open the app — an email goes out only when a

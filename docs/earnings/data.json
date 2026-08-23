@@ -35,6 +35,134 @@
       ],
       "ugly": [],
       "red_flags": [],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-07-30",
+            "revenue": 13507000000
+          },
+          {
+            "period_end": "2023-10-29",
+            "revenue": 18120000000
+          },
+          {
+            "period_end": "2024-01-28",
+            "revenue": 22103000000
+          },
+          {
+            "period_end": "2024-04-28",
+            "revenue": 26044000000
+          },
+          {
+            "period_end": "2024-07-28",
+            "revenue": 30040000000
+          },
+          {
+            "period_end": "2024-10-27",
+            "revenue": 35082000000
+          },
+          {
+            "period_end": "2025-01-26",
+            "revenue": 39331000000
+          },
+          {
+            "period_end": "2025-04-27",
+            "revenue": 44062000000
+          },
+          {
+            "period_end": "2025-07-27",
+            "revenue": 46743000000
+          },
+          {
+            "period_end": "2025-10-26",
+            "revenue": 57006000000
+          },
+          {
+            "period_end": "2026-01-25",
+            "revenue": 68127000000
+          },
+          {
+            "period_end": "2026-04-26",
+            "revenue": 81615000000
+          }
+        ],
+        "revenue_growth_streak": 11,
+        "margin_expansion_streak": 0,
+        "quarters_table": [
+          {
+            "period_end": "2026-04-26",
+            "revenue": 81615000000,
+            "gross_margin_pct": 74.93,
+            "eps_diluted": 2.39
+          },
+          {
+            "period_end": "2026-01-25",
+            "revenue": 68127000000,
+            "gross_margin_pct": 75.0,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-10-26",
+            "revenue": 57006000000,
+            "gross_margin_pct": 73.41,
+            "eps_diluted": 1.3
+          },
+          {
+            "period_end": "2025-07-27",
+            "revenue": 46743000000,
+            "gross_margin_pct": 72.42,
+            "eps_diluted": 1.08
+          },
+          {
+            "period_end": "2025-04-27",
+            "revenue": 44062000000,
+            "gross_margin_pct": 60.52,
+            "eps_diluted": 0.76
+          },
+          {
+            "period_end": "2025-01-26",
+            "revenue": 39331000000,
+            "gross_margin_pct": 73.03,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2024-10-27",
+            "revenue": 35082000000,
+            "gross_margin_pct": 74.56,
+            "eps_diluted": 0.78
+          },
+          {
+            "period_end": "2024-07-28",
+            "revenue": 30040000000,
+            "gross_margin_pct": 75.15,
+            "eps_diluted": 0.67
+          },
+          {
+            "period_end": "2024-04-28",
+            "revenue": 26044000000,
+            "gross_margin_pct": 78.35,
+            "eps_diluted": 0.6
+          },
+          {
+            "period_end": "2024-01-28",
+            "revenue": 22103000000,
+            "gross_margin_pct": 75.97,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2023-10-29",
+            "revenue": 18120000000,
+            "gross_margin_pct": 73.95,
+            "eps_diluted": 0.37
+          },
+          {
+            "period_end": "2023-07-30",
+            "revenue": 13507000000,
+            "gross_margin_pct": 70.05,
+            "eps_diluted": 0.25
+          }
+        ]
+      },
       "description": "Designs GPUs and AI chips that power most large-scale AI training and data centers."
     },
     {
@@ -82,6 +210,134 @@
           "detail": "For two straight quarters, operating costs have grown faster than revenue (most recent: opex +0.9% vs. revenue -1.6%). If this continues, profitability erodes even while the top line still grows."
         }
       ],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-09-30",
+            "revenue": 89498000000
+          },
+          {
+            "period_end": "2023-12-30",
+            "revenue": 119575000000
+          },
+          {
+            "period_end": "2024-03-30",
+            "revenue": 90753000000
+          },
+          {
+            "period_end": "2024-06-29",
+            "revenue": 85777000000
+          },
+          {
+            "period_end": "2024-09-28",
+            "revenue": 94930000000
+          },
+          {
+            "period_end": "2024-12-28",
+            "revenue": 124300000000
+          },
+          {
+            "period_end": "2025-03-29",
+            "revenue": 95359000000
+          },
+          {
+            "period_end": "2025-06-28",
+            "revenue": 94036000000
+          },
+          {
+            "period_end": "2025-09-27",
+            "revenue": 102466000000
+          },
+          {
+            "period_end": "2025-12-27",
+            "revenue": 143756000000
+          },
+          {
+            "period_end": "2026-03-28",
+            "revenue": 111184000000
+          },
+          {
+            "period_end": "2026-06-27",
+            "revenue": 109417000000
+          }
+        ],
+        "revenue_growth_streak": 0,
+        "margin_expansion_streak": 4,
+        "quarters_table": [
+          {
+            "period_end": "2026-06-27",
+            "revenue": 109417000000,
+            "gross_margin_pct": 50.06,
+            "eps_diluted": 2.02
+          },
+          {
+            "period_end": "2026-03-28",
+            "revenue": 111184000000,
+            "gross_margin_pct": 49.27,
+            "eps_diluted": 2.01
+          },
+          {
+            "period_end": "2025-12-27",
+            "revenue": 143756000000,
+            "gross_margin_pct": 48.16,
+            "eps_diluted": 2.84
+          },
+          {
+            "period_end": "2025-09-27",
+            "revenue": 102466000000,
+            "gross_margin_pct": 47.18,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-06-28",
+            "revenue": 94036000000,
+            "gross_margin_pct": 46.49,
+            "eps_diluted": 1.57
+          },
+          {
+            "period_end": "2025-03-29",
+            "revenue": 95359000000,
+            "gross_margin_pct": 47.05,
+            "eps_diluted": 1.65
+          },
+          {
+            "period_end": "2024-12-28",
+            "revenue": 124300000000,
+            "gross_margin_pct": 46.88,
+            "eps_diluted": 2.4
+          },
+          {
+            "period_end": "2024-09-28",
+            "revenue": 94930000000,
+            "gross_margin_pct": 46.22,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2024-06-29",
+            "revenue": 85777000000,
+            "gross_margin_pct": 46.26,
+            "eps_diluted": 1.4
+          },
+          {
+            "period_end": "2024-03-30",
+            "revenue": 90753000000,
+            "gross_margin_pct": 46.58,
+            "eps_diluted": 1.53
+          },
+          {
+            "period_end": "2023-12-30",
+            "revenue": 119575000000,
+            "gross_margin_pct": 45.87,
+            "eps_diluted": 2.18
+          },
+          {
+            "period_end": "2023-09-30",
+            "revenue": 89498000000,
+            "gross_margin_pct": 45.17,
+            "eps_diluted": null
+          }
+        ]
+      },
       "description": "Makes the iPhone, Mac, and services like the App Store and iCloud."
     },
     {
@@ -135,6 +391,134 @@
           "detail": "Cash and equivalents fell 34.8% in one quarter. Debt rose 0.1% in the same period \u2014 spending down cash while also borrowing more is worth a closer look."
         }
       ],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-09-30",
+            "revenue": 56517000000
+          },
+          {
+            "period_end": "2023-12-31",
+            "revenue": 62020000000
+          },
+          {
+            "period_end": "2024-03-31",
+            "revenue": 61858000000
+          },
+          {
+            "period_end": "2024-06-30",
+            "revenue": 64727000000
+          },
+          {
+            "period_end": "2024-09-30",
+            "revenue": 65585000000
+          },
+          {
+            "period_end": "2024-12-31",
+            "revenue": 69632000000
+          },
+          {
+            "period_end": "2025-03-31",
+            "revenue": 70066000000
+          },
+          {
+            "period_end": "2025-06-30",
+            "revenue": 76441000000
+          },
+          {
+            "period_end": "2025-09-30",
+            "revenue": 77673000000
+          },
+          {
+            "period_end": "2025-12-31",
+            "revenue": 81273000000
+          },
+          {
+            "period_end": "2026-03-31",
+            "revenue": 82886000000
+          },
+          {
+            "period_end": "2026-06-30",
+            "revenue": 90007000000
+          }
+        ],
+        "revenue_growth_streak": 9,
+        "margin_expansion_streak": 0,
+        "quarters_table": [
+          {
+            "period_end": "2026-06-30",
+            "revenue": 90007000000,
+            "gross_margin_pct": 67.2,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2026-03-31",
+            "revenue": 82886000000,
+            "gross_margin_pct": 67.63,
+            "eps_diluted": 4.27
+          },
+          {
+            "period_end": "2025-12-31",
+            "revenue": 81273000000,
+            "gross_margin_pct": 68.04,
+            "eps_diluted": 5.16
+          },
+          {
+            "period_end": "2025-09-30",
+            "revenue": 77673000000,
+            "gross_margin_pct": 69.05,
+            "eps_diluted": 3.72
+          },
+          {
+            "period_end": "2025-06-30",
+            "revenue": 76441000000,
+            "gross_margin_pct": 68.58,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-03-31",
+            "revenue": 70066000000,
+            "gross_margin_pct": 68.72,
+            "eps_diluted": 3.46
+          },
+          {
+            "period_end": "2024-12-31",
+            "revenue": 69632000000,
+            "gross_margin_pct": 68.69,
+            "eps_diluted": 3.23
+          },
+          {
+            "period_end": "2024-09-30",
+            "revenue": 65585000000,
+            "gross_margin_pct": 69.35,
+            "eps_diluted": 3.3
+          },
+          {
+            "period_end": "2024-06-30",
+            "revenue": 64727000000,
+            "gross_margin_pct": 69.59,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2024-03-31",
+            "revenue": 61858000000,
+            "gross_margin_pct": 70.08,
+            "eps_diluted": 2.94
+          },
+          {
+            "period_end": "2023-12-31",
+            "revenue": 62020000000,
+            "gross_margin_pct": 68.36,
+            "eps_diluted": 2.93
+          },
+          {
+            "period_end": "2023-09-30",
+            "revenue": 56517000000,
+            "gross_margin_pct": 71.16,
+            "eps_diluted": 2.99
+          }
+        ]
+      },
       "description": "Software and cloud giant \u2014 Windows, Office, and Azure cloud computing."
     },
     {
@@ -171,6 +555,34 @@
       "bad": [],
       "ugly": [],
       "red_flags": [],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2025-06-30",
+            "revenue": 4071000000
+          },
+          {
+            "period_end": "2026-06-30",
+            "revenue": 7814000000
+          }
+        ],
+        "revenue_growth_streak": 1,
+        "margin_expansion_streak": 1,
+        "quarters_table": [
+          {
+            "period_end": "2026-06-30",
+            "revenue": 7814000000,
+            "gross_margin_pct": 55.27,
+            "eps_diluted": -0.09
+          },
+          {
+            "period_end": "2025-06-30",
+            "revenue": 4071000000,
+            "gross_margin_pct": 43.94,
+            "eps_diluted": -0.34
+          }
+        ]
+      },
       "description": "Builds and launches rockets and satellites, including Starlink. IPO'd June 2026."
     },
     {
@@ -212,6 +624,134 @@
       ],
       "ugly": [],
       "red_flags": [],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-08-31",
+            "revenue": 4010000000
+          },
+          {
+            "period_end": "2023-11-30",
+            "revenue": 4726000000
+          },
+          {
+            "period_end": "2024-02-29",
+            "revenue": 5824000000
+          },
+          {
+            "period_end": "2024-05-30",
+            "revenue": 6811000000
+          },
+          {
+            "period_end": "2024-08-29",
+            "revenue": 7750000000
+          },
+          {
+            "period_end": "2024-11-28",
+            "revenue": 8709000000
+          },
+          {
+            "period_end": "2025-02-27",
+            "revenue": 8053000000
+          },
+          {
+            "period_end": "2025-05-29",
+            "revenue": 9301000000
+          },
+          {
+            "period_end": "2025-08-28",
+            "revenue": 11315000000
+          },
+          {
+            "period_end": "2025-11-27",
+            "revenue": 13643000000
+          },
+          {
+            "period_end": "2026-02-26",
+            "revenue": 23860000000
+          },
+          {
+            "period_end": "2026-05-28",
+            "revenue": 41456000000
+          }
+        ],
+        "revenue_growth_streak": 5,
+        "margin_expansion_streak": 5,
+        "quarters_table": [
+          {
+            "period_end": "2026-05-28",
+            "revenue": 41456000000,
+            "gross_margin_pct": 84.56,
+            "eps_diluted": 24.67
+          },
+          {
+            "period_end": "2026-02-26",
+            "revenue": 23860000000,
+            "gross_margin_pct": 74.41,
+            "eps_diluted": 12.07
+          },
+          {
+            "period_end": "2025-11-27",
+            "revenue": 13643000000,
+            "gross_margin_pct": 56.04,
+            "eps_diluted": 4.6
+          },
+          {
+            "period_end": "2025-08-28",
+            "revenue": 11315000000,
+            "gross_margin_pct": 44.67,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-05-29",
+            "revenue": 9301000000,
+            "gross_margin_pct": 37.72,
+            "eps_diluted": 1.68
+          },
+          {
+            "period_end": "2025-02-27",
+            "revenue": 8053000000,
+            "gross_margin_pct": 36.79,
+            "eps_diluted": 1.41
+          },
+          {
+            "period_end": "2024-11-28",
+            "revenue": 8709000000,
+            "gross_margin_pct": 38.44,
+            "eps_diluted": 1.67
+          },
+          {
+            "period_end": "2024-08-29",
+            "revenue": 7750000000,
+            "gross_margin_pct": 35.32,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2024-05-30",
+            "revenue": 6811000000,
+            "gross_margin_pct": 26.9,
+            "eps_diluted": 0.3
+          },
+          {
+            "period_end": "2024-02-29",
+            "revenue": 5824000000,
+            "gross_margin_pct": 18.53,
+            "eps_diluted": 0.71
+          },
+          {
+            "period_end": "2023-11-30",
+            "revenue": 4726000000,
+            "gross_margin_pct": -0.74,
+            "eps_diluted": -1.12
+          },
+          {
+            "period_end": "2023-08-31",
+            "revenue": 4010000000,
+            "gross_margin_pct": -10.85,
+            "eps_diluted": null
+          }
+        ]
+      },
       "description": "Makes memory and storage chips (DRAM and NAND) for computers, phones, and data centers."
     },
     {
@@ -244,6 +784,114 @@
       "bad": [],
       "ugly": [],
       "red_flags": [],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1665000000
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1705000000
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 1883000000
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 1876000000
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 1695000000
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 1901000000
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2308000000
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 3025000000
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 5950000000
+          },
+          {
+            "period_end": "2026-07-03",
+            "revenue": 8965000000
+          }
+        ],
+        "revenue_growth_streak": 5,
+        "margin_expansion_streak": 5,
+        "quarters_table": [
+          {
+            "period_end": "2026-07-03",
+            "revenue": 8965000000,
+            "gross_margin_pct": 84.57,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 5950000000,
+            "gross_margin_pct": 78.35,
+            "eps_diluted": 23.03
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 3025000000,
+            "gross_margin_pct": 50.94,
+            "eps_diluted": 5.15
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2308000000,
+            "gross_margin_pct": 29.77,
+            "eps_diluted": 0.75
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 1901000000,
+            "gross_margin_pct": 26.2,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 1695000000,
+            "gross_margin_pct": 22.54,
+            "eps_diluted": -13.33
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 1876000000,
+            "gross_margin_pct": 32.3,
+            "eps_diluted": 0.72
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 1883000000,
+            "gross_margin_pct": 38.56,
+            "eps_diluted": 1.46
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1705000000,
+            "gross_margin_pct": 27.16,
+            "eps_diluted": 0.19
+          },
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1665000000,
+            "gross_margin_pct": 9.67,
+            "eps_diluted": null
+          }
+        ]
+      },
       "description": "Makes NAND flash storage and memory cards. Spun off from Western Digital in 2025."
     },
     {
@@ -293,6 +941,134 @@
           "detail": "Cash and equivalents fell 23.0% in one quarter."
         }
       ],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-09-29",
+            "revenue": 1194000000
+          },
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1367000000
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1752000000
+          },
+          {
+            "period_end": "2024-06-28",
+            "revenue": 2004000000
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 2212000000
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 2409000000
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 2294000000
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 2605000000
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2818000000
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 3017000000
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 3337000000
+          },
+          {
+            "period_end": "2026-07-03",
+            "revenue": 3747000000
+          }
+        ],
+        "revenue_growth_streak": 5,
+        "margin_expansion_streak": 11,
+        "quarters_table": [
+          {
+            "period_end": "2026-07-03",
+            "revenue": 3747000000,
+            "gross_margin_pct": 54.12,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 3337000000,
+            "gross_margin_pct": 50.22,
+            "eps_diluted": 8.2
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 3017000000,
+            "gross_margin_pct": 45.74,
+            "eps_diluted": 4.73
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2818000000,
+            "gross_margin_pct": 43.54,
+            "eps_diluted": 3.07
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 2605000000,
+            "gross_margin_pct": 40.96,
+            "eps_diluted": 0.75
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 2294000000,
+            "gross_margin_pct": 39.76,
+            "eps_diluted": 1.42
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 2409000000,
+            "gross_margin_pct": 37.65,
+            "eps_diluted": 1.63
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 2212000000,
+            "gross_margin_pct": 36.44,
+            "eps_diluted": 1.35
+          },
+          {
+            "period_end": "2024-06-28",
+            "revenue": 2004000000,
+            "gross_margin_pct": 34.78,
+            "eps_diluted": 0.08
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1752000000,
+            "gross_margin_pct": 29.62,
+            "eps_diluted": 0.35
+          },
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1367000000,
+            "gross_margin_pct": 22.9,
+            "eps_diluted": -0.92
+          },
+          {
+            "period_end": "2023-09-29",
+            "revenue": 1194000000,
+            "gross_margin_pct": 20.44,
+            "eps_diluted": -2.17
+          }
+        ]
+      },
       "description": "Makes hard drives and storage systems, mainly for data centers."
     },
     {
@@ -329,6 +1105,134 @@
       "bad": [],
       "ugly": [],
       "red_flags": [],
+      "trend": {
+        "revenue_points": [
+          {
+            "period_end": "2023-09-29",
+            "revenue": 1454000000
+          },
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1555000000
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1655000000
+          },
+          {
+            "period_end": "2024-06-28",
+            "revenue": 1887000000
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 2168000000
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 2325000000
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 2160000000
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 2444000000
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2629000000
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 2825000000
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 3112000000
+          },
+          {
+            "period_end": "2026-07-03",
+            "revenue": 3629000000
+          }
+        ],
+        "revenue_growth_streak": 5,
+        "margin_expansion_streak": 11,
+        "quarters_table": [
+          {
+            "period_end": "2026-07-03",
+            "revenue": 3629000000,
+            "gross_margin_pct": 52.3,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2026-04-03",
+            "revenue": 3112000000,
+            "gross_margin_pct": 46.5,
+            "eps_diluted": 3.27
+          },
+          {
+            "period_end": "2026-01-02",
+            "revenue": 2825000000,
+            "gross_margin_pct": 41.63,
+            "eps_diluted": 2.6
+          },
+          {
+            "period_end": "2025-10-03",
+            "revenue": 2629000000,
+            "gross_margin_pct": 39.44,
+            "eps_diluted": 2.43
+          },
+          {
+            "period_end": "2025-06-27",
+            "revenue": 2444000000,
+            "gross_margin_pct": 37.4,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2025-03-28",
+            "revenue": 2160000000,
+            "gross_margin_pct": 35.19,
+            "eps_diluted": 1.57
+          },
+          {
+            "period_end": "2024-12-27",
+            "revenue": 2325000000,
+            "gross_margin_pct": 34.92,
+            "eps_diluted": 1.55
+          },
+          {
+            "period_end": "2024-09-27",
+            "revenue": 2168000000,
+            "gross_margin_pct": 32.93,
+            "eps_diluted": 1.41
+          },
+          {
+            "period_end": "2024-06-28",
+            "revenue": 1887000000,
+            "gross_margin_pct": 31.8,
+            "eps_diluted": null
+          },
+          {
+            "period_end": "2024-03-29",
+            "revenue": 1655000000,
+            "gross_margin_pct": 25.68,
+            "eps_diluted": 0.12
+          },
+          {
+            "period_end": "2023-12-29",
+            "revenue": 1555000000,
+            "gross_margin_pct": 23.28,
+            "eps_diluted": -0.09
+          },
+          {
+            "period_end": "2023-09-29",
+            "revenue": 1454000000,
+            "gross_margin_pct": 10.25,
+            "eps_diluted": -0.88
+          }
+        ]
+      },
       "description": "Makes hard drives, mainly for data centers and cloud storage providers."
     }
   ]
