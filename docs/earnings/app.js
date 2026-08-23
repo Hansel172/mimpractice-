@@ -196,9 +196,21 @@ function companyCard(company) {
   </section>`;
 }
 
+/* Lower number = shown first. A company with a high-severity flag is the
+   one thing worth seeing before you scroll, so it leads; errored/thin-data
+   entries have nothing actionable to show and sink to the bottom. */
+function severityRank(company) {
+  if (company.error || company.insufficient_data) return 3;
+  const flags = company.red_flags || [];
+  if (flags.some(f => f.severity === 'high')) return 0;
+  if (flags.some(f => f.severity === 'medium')) return 1;
+  return 2;
+}
+
 function render(data) {
-  document.getElementById('grid').innerHTML =
-    (data.companies || []).map(companyCard).join('');
+  const companies = [...(data.companies || [])].sort((a, b) =>
+    severityRank(a) - severityRank(b) || a.ticker.localeCompare(b.ticker));
+  document.getElementById('grid').innerHTML = companies.map(companyCard).join('');
   drawSparklines();
 }
 
