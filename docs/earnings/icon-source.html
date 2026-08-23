@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  svg { display: block; }
+</style>
+<body>
+<!--
+  App icon design, kept intentionally simple:
+    - Full-bleed dark background matching the app's own --bg (#0a0a0f) and
+      the manifest's theme_color, so the icon visually continues into the
+      app when it launches rather than flashing a mismatched color.
+    - A single upward sparkline with an endpoint dot — this is the exact
+      motif already used on every card in the app (revenue trend, endpoint
+      marked in the status color), so the icon is a real visual quote of
+      the app's own content rather than an unrelated generic mark.
+    - No text: illegible at 29-60px icon sizes, and the OS already prints
+      the app name underneath the icon.
+    - ~18% margin on all sides — iOS applies its own rounded-square mask
+      automatically, and a design that runs edge-to-edge gets clipped by it.
+-->
+<svg viewBox="0 0 512 512" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#0a0a0f"/>
+  <path d="M 92 340 L 190 280 L 280 305 L 420 150"
+        fill="none" stroke="#00e676" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="420" cy="150" r="30" fill="#00e676"/>
+</svg>
+</body>

@@ -137,6 +137,16 @@ quarter versus the one before it:
   table. EPS reads `n/a` on a derived Q4 for the same reason it does
   elsewhere in this tool — see "Q4 is derived, not filed directly" above.
 
+### App icon
+
+`docs/earnings/icon-source.html` is the editable source — a plain SVG (an
+upward sparkline with an endpoint dot, the same motif already used on every
+card) rendered to `icon-180.png` / `icon-192.png` / `icon-512.png` via a
+browser canvas rather than a design tool, so no new dependency was needed.
+To change it: edit the SVG in that file, then regenerate the three PNGs at
+their exact pixel sizes (rendering each at its native size directly, rather
+than scaling one image down, is what keeps the small one crisp).
+
 ## Email alerts
 
 You don't have to remember to open the app — an email goes out only when a
