@@ -1,10 +1,11 @@
-# One ticker per line. Lines starting with # are ignored.
+# One entry per line: TICKER, then a short description of the business.
+# Lines starting with # are ignored.
 # Edit this file and re-run scripts/build_public.py to update the app.
-NVDA
-AAPL
-MSFT
-SPCX
-MU
-SNDK
-WDC
-STX
+NVDA  Designs GPUs and AI chips that power most large-scale AI training and data centers.
+AAPL  Makes the iPhone, Mac, and services like the App Store and iCloud.
+MSFT  Software and cloud giant — Windows, Office, and Azure cloud computing.
+SPCX  Builds and launches rockets and satellites, including Starlink. IPO'd June 2026.
+MU    Makes memory and storage chips (DRAM and NAND) for computers, phones, and data centers.
+SNDK  Makes NAND flash storage and memory cards. Spun off from Western Digital in 2025.
+WDC   Makes hard drives and storage systems, mainly for data centers.
+STX   Makes hard drives, mainly for data centers and cloud storage providers.

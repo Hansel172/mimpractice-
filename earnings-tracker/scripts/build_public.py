@@ -25,30 +25,47 @@ OUT = ROOT.parent / "docs" / "earnings"
 
 
 def load_watchlist():
+    """Each line is TICKER followed by a short description of the business
+    (whitespace-separated, description is everything after the ticker).
+    Returns [(ticker, description), ...]; description is "" if a line has
+    no text after the ticker."""
     lines = (ROOT / "watchlist.txt").read_text().splitlines()
-    return [l.strip().upper() for l in lines if l.strip() and not l.startswith("#")]
+    entries = []
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(None, 1)
+        ticker = parts[0].upper()
+        description = parts[1].strip() if len(parts) > 1 else ""
+        entries.append((ticker, description))
+    return entries
 
 
 def main():
-    tickers = load_watchlist()
-    print(f"Building public app for {len(tickers)} ticker(s): {', '.join(tickers)}")
+    watchlist = load_watchlist()
+    print(f"Building public app for {len(watchlist)} ticker(s): "
+          f"{', '.join(t for t, _ in watchlist)}")
 
     companies = []
-    for ticker in tickers:
+    for ticker, description in watchlist:
         print(f"\n{ticker}...")
         cik = sec_data.get_cik(ticker)
         if not cik:
             print(f"  not found on SEC EDGAR — skipping")
-            companies.append({"ticker": ticker, "error": "not found on SEC EDGAR"})
+            companies.append({"ticker": ticker, "description": description,
+                               "error": "not found on SEC EDGAR"})
             continue
 
         quarters = sec_data.get_quarterly_financials(ticker, num_quarters=12)
         if not quarters:
             print(f"  no usable financial data — skipping")
-            companies.append({"ticker": ticker, "error": "no financial data available"})
+            companies.append({"ticker": ticker, "description": description,
+                               "error": "no financial data available"})
             continue
 
         analysis = build_analysis(ticker, quarters)
+        analysis["description"] = description
         if not analysis["insufficient_data"]:
             surprise = sec_data.get_earnings_surprise(ticker, analysis["period_end"])
             if surprise and surprise.get("eps"):

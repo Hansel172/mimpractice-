@@ -90,9 +90,12 @@ your phone rather than the terminal. It lives at `docs/earnings/` and
 publishes to GitHub Pages, refreshed automatically on weekdays after market
 close by `.github/workflows/earnings_refresh.yml`.
 
-**Which companies show up** is controlled by `watchlist.txt` (one ticker per
-line) — a different, deliberately public list from the CLI's own
-`watchlist_data/` (see Privacy below).
+**Which companies show up** is controlled by `watchlist.txt` — one entry per
+line, ticker followed by a short description of the business (e.g. `NVDA
+Designs GPUs and AI chips...`), which the app displays on each card. A
+different, deliberately public list from the CLI's own `watchlist_data/`
+(see Privacy below). The CLI's `analyze` command also looks up a matching
+description here if one exists, purely as a bonus — it works fine without one.
 
 **To rebuild it by hand:**
 ```bash

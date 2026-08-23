@@ -12,9 +12,29 @@ and Nasdaq's public earnings calendar.
 
 import sys
 
+from pathlib import Path
+
 import data_store
 import sec_data
 from analyzer import build_analysis
+
+
+def _lookup_description(ticker):
+    """Best-effort lookup in watchlist.txt — the same file the web app
+    reads. Silently returns "" if the ticker isn't listed there (the CLI's
+    add/analyze commands work on any ticker, not just the app's watchlist)
+    or the file doesn't exist."""
+    path = Path(__file__).resolve().parent / "watchlist.txt"
+    if not path.exists():
+        return ""
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(None, 1)
+        if parts[0].upper() == ticker.upper() and len(parts) > 1:
+            return parts[1].strip()
+    return ""
 
 
 def _fmt_pct(v, signed=True):
@@ -89,6 +109,9 @@ def cmd_analyze(ticker):
 
     print(f"\n{'=' * 60}")
     print(f"  EARNINGS ANALYSIS — {ticker}")
+    description = _lookup_description(ticker)
+    if description:
+        print(f"  {description}")
     print(f"  Quarter ending {result['period_end']}  (vs. {result['compared_to']})")
     print(f"{'=' * 60}")
 

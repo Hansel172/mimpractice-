@@ -34,7 +34,8 @@
         }
       ],
       "ugly": [],
-      "red_flags": []
+      "red_flags": [],
+      "description": "Designs GPUs and AI chips that power most large-scale AI training and data centers."
     },
     {
       "ticker": "AAPL",
@@ -80,7 +81,8 @@
           "severity": "medium",
           "detail": "For two straight quarters, operating costs have grown faster than revenue (most recent: opex +0.9% vs. revenue -1.6%). If this continues, profitability erodes even while the top line still grows."
         }
-      ]
+      ],
+      "description": "Makes the iPhone, Mac, and services like the App Store and iCloud."
     },
     {
       "ticker": "MSFT",
@@ -132,7 +134,8 @@
           "severity": "high",
           "detail": "Cash and equivalents fell 34.8% in one quarter. Debt rose 0.1% in the same period \u2014 spending down cash while also borrowing more is worth a closer look."
         }
-      ]
+      ],
+      "description": "Software and cloud giant \u2014 Windows, Office, and Azure cloud computing."
     },
     {
       "ticker": "SPCX",
@@ -167,7 +170,8 @@
       ],
       "bad": [],
       "ugly": [],
-      "red_flags": []
+      "red_flags": [],
+      "description": "Builds and launches rockets and satellites, including Starlink. IPO'd June 2026."
     },
     {
       "ticker": "MU",
@@ -207,7 +211,8 @@
         }
       ],
       "ugly": [],
-      "red_flags": []
+      "red_flags": [],
+      "description": "Makes memory and storage chips (DRAM and NAND) for computers, phones, and data centers."
     },
     {
       "ticker": "SNDK",
@@ -238,7 +243,8 @@
       ],
       "bad": [],
       "ugly": [],
-      "red_flags": []
+      "red_flags": [],
+      "description": "Makes NAND flash storage and memory cards. Spun off from Western Digital in 2025."
     },
     {
       "ticker": "WDC",
@@ -286,7 +292,8 @@
           "severity": "medium",
           "detail": "Cash and equivalents fell 23.0% in one quarter."
         }
-      ]
+      ],
+      "description": "Makes hard drives and storage systems, mainly for data centers."
     },
     {
       "ticker": "STX",
@@ -321,7 +328,8 @@
       ],
       "bad": [],
       "ugly": [],
-      "red_flags": []
+      "red_flags": [],
+      "description": "Makes hard drives, mainly for data centers and cloud storage providers."
     }
   ]
 }
