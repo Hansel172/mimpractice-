@@ -37,6 +37,19 @@ jobs:
       - name: Build public app
         run: python3 earnings-tracker/scripts/build_public.py
 
+      # Writes a short plain-English "story" per company on top of the
+      # mechanical build above — same split as the macro tracker's
+      # refresh.py (numbers) vs themes.json (judgment). Given only the
+      # already-computed good/bad/ugly/red-flag facts, never asked to do
+      # new analysis, so it can't introduce a claim the rest of the app
+      # doesn't already back up. Skips itself cleanly (exit 0, no story
+      # field written) if ANTHROPIC_API_KEY isn't set, so the app still
+      # ships in full without it.
+      - name: Write AI summaries
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 earnings-tracker/scripts/write_stories.py
+
       # Same SendGrid secrets already configured for morning_briefing.yml —
       # one alert pipeline, not two. Silent when nothing has changed.
       - name: Send alert email if anyone reported
