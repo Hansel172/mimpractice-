@@ -172,6 +172,13 @@ function companyCard(company) {
     : '';
 
   const trend = company.trend || {};
+  // Labeled explicitly and kept visually distinct from everything below it
+  // (a callout, not a bullet list) — this is the one part of the card
+  // that's synthesized rather than independently computed from SEC/Nasdaq
+  // data, and a reader should always be able to tell which is which.
+  const story = company.story
+    ? `<div class="story"><div class="story-label">AI summary</div>${esc(company.story)}</div>`
+    : '';
 
   return `<section class="card" style="--s:${s.color}">
     <div class="card-head">
@@ -183,6 +190,7 @@ function companyCard(company) {
     </div>
     ${descLine(company.description)}
     ${gapNote}
+    ${story}
     ${sparklineContainer(trend.revenue_points || [], s.color)}
     ${streakNotes(trend)}
     <div class="cols">

@@ -163,6 +163,33 @@ latest quarter date changed gets an email; nothing else does.
 python earnings-tracker/scripts/send_alerts.py path/to/an/older/data.json
 ```
 
+## AI summaries
+
+Each card can carry a short "AI summary" — 2-4 plain-English sentences
+explaining what happened that quarter and why, instead of only bullet
+lists. `write_stories.py` runs as an extra step in the same scheduled
+Action, right after `build_public.py` computes the mechanical numbers.
+
+**It's given the facts, not asked to find them.** The prompt hands it
+exactly the same good/bad/ugly/red-flag/streak lines the app itself
+renders — nothing more — and tells it explicitly not to introduce any
+number or claim beyond them. This keeps a hard line between what's
+computed (verifiable, from SEC/Nasdaq) and what's written (synthesized
+from those already-verified facts). The app labels it "AI summary" for
+the same reason — it's the one part of a card that isn't independently
+checkable the way everything else is.
+
+**Setup:** create an API key at [console.anthropic.com](https://console.anthropic.com),
+then add it as a repo secret named `ANTHROPIC_API_KEY` (same place as the
+SendGrid secrets — repo Settings → Secrets and variables → Actions).
+Without it, this step skips itself cleanly and the rest of the app ships
+as normal — a missing summary is a smaller problem than a broken build.
+
+**To test it by hand** (needs `ANTHROPIC_API_KEY` in `.env`):
+```bash
+python earnings-tracker/scripts/write_stories.py
+```
+
 ## Files
 
 | File | What it does |
@@ -175,6 +202,7 @@ python earnings-tracker/scripts/send_alerts.py path/to/an/older/data.json
 | `watchlist.txt` | Which companies the *web app* shows — plain, public, committed |
 | `scripts/build_public.py` | Builds `docs/earnings/` from `watchlist.txt` |
 | `scripts/send_alerts.py` | Emails you only when someone new has reported |
+| `scripts/write_stories.py` | Writes the "AI summary" on each card, from facts already computed |
 | `watchlist_data/` | Where the *CLI's* tracked companies' data lives (not committed — see below) |
 
 ## Privacy
