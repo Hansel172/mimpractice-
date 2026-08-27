@@ -87,8 +87,11 @@ whichever tag happens to be tried first.
 
 There's also a real page — the same analysis, but as something you open on
 your phone rather than the terminal. It lives at `docs/earnings/` and
-publishes to GitHub Pages, refreshed automatically on weekdays after market
-close by `.github/workflows/earnings_refresh.yml`.
+publishes to GitHub Pages, refreshed automatically by
+`.github/workflows/earnings_refresh.yml` every hour from 4pm-8pm ET on
+weekdays (plus on demand via "Run workflow" in the Actions tab). It checks
+hourly through that window rather than once at market close, since a real
+report doesn't always land exactly at close.
 
 **Which companies show up** is controlled by `watchlist.txt` — one entry per
 line, ticker followed by a short description of the business (e.g. `NVDA
@@ -178,6 +181,14 @@ computed (verifiable, from SEC/Nasdaq) and what's written (synthesized
 from those already-verified facts). The app labels it "AI summary" for
 the same reason — it's the one part of a card that isn't independently
 checkable the way everything else is.
+
+**It skips companies that haven't changed.** With the app refreshing
+hourly during the evening earnings window, most runs find nobody new has
+reported. `write_stories.py` is handed the same pre-rebuild snapshot
+`send_alerts.py` uses, and reuses a company's existing story whenever its
+`period_end` hasn't moved since that snapshot — so an unchanged company
+costs nothing, and only a company with a genuinely new quarter gets a
+fresh Claude call.
 
 **Setup:** create an API key at [console.anthropic.com](https://console.anthropic.com),
 then add it as a repo secret named `ANTHROPIC_API_KEY` (same place as the
