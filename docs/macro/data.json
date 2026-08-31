@@ -1,34 +1,34 @@
 {
   "live": {
-    "updated": "2026-08-28T21:21:10+00:00",
+    "updated": "2026-08-31T17:59:30+00:00",
     "market": {
       "SP500": {
         "label": "S&P 500",
-        "value": 7730.99,
+        "value": 7711.76,
         "unit": "",
         "note": "last close",
-        "changePct": 0.72,
-        "asOf": "2026-08-27",
+        "changePct": -0.25,
+        "asOf": "2026-08-28",
         "source": "FRED SP500",
         "sourceUrl": "https://fred.stlouisfed.org/series/SP500"
       },
       "NASDAQCOM": {
         "label": "Nasdaq",
-        "value": 26541.35,
+        "value": 26402.42,
         "unit": "",
         "note": "last close",
-        "changePct": 1.57,
-        "asOf": "2026-08-27",
+        "changePct": -0.52,
+        "asOf": "2026-08-28",
         "source": "FRED NASDAQCOM",
         "sourceUrl": "https://fred.stlouisfed.org/series/NASDAQCOM"
       },
       "VIXCLS": {
         "label": "VIX",
-        "value": 14.51,
+        "value": 14.43,
         "unit": "",
         "note": "last close",
-        "changePct": -4.6,
-        "asOf": "2026-08-27",
+        "changePct": -0.55,
+        "asOf": "2026-08-28",
         "source": "FRED VIXCLS",
         "sourceUrl": "https://fred.stlouisfed.org/series/VIXCLS"
       }
