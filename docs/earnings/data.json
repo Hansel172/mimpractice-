@@ -175,7 +175,7 @@
         ]
       },
       "description": "Designs GPUs and AI chips that power most large-scale AI training and data centers.",
-      "story": "Nvidia grew revenue 17.9% this quarter, extending an 11-quarter streak of growth, and cash on hand jumped 69.5%. But net income and EPS barely moved (up just 2.3% and 2.9%), meaning the extra sales didn't translate into much extra profit despite a steady gross margin around 75%. The most notable shift is debt, which nearly quadrupled (+293.9%) \u2014 a big enough jump that it's worth understanding what that borrowed money is being used for."
+      "story": "Nvidia's revenue climbed 17.9% and cash on hand jumped nearly 70%, extending an 11-quarter growth streak, though profit didn't keep pace\u2014net income and diluted EPS each rose only around 2-3%, and gross margin barely budged. The standout number is debt, which nearly quadrupled (up 293.9%) quarter over quarter, a shift big enough to flag even though the data doesn't say what the borrowed money is funding. So while the top-line story remains strong growth and a healthier cash position, the widening gap between revenue growth and profit growth, plus the sudden debt increase, are worth watching for context in future quarters."
     },
     {
       "ticker": "AAPL",
@@ -351,7 +351,7 @@
         ]
       },
       "description": "Makes the iPhone, Mac, and services like the App Store and iCloud.",
-      "story": "Apple's profitability held up this quarter even as revenue slipped 1.6%, thanks to gross margin climbing to 50.1% \u2014 its fourth straight quarter of improvement. That margin strength helped push net income and EPS slightly higher and allowed the company to pay down a bit of debt. However, operating expenses grew faster than revenue for a second consecutive quarter, a pattern that could start eating into profits if sales don't pick back up. Cash on hand also dropped notably, down 13.2% from the prior quarter."
+      "story": "Apple's profit and per-share earnings ticked up slightly this quarter even though revenue actually shrank a bit, thanks to gross margin improving to 50.1% \u2014 the fourth straight quarter of margin gains. That said, the cushion is thinning: operating expenses have now outgrown revenue for two quarters running, meaning costs are rising faster than sales, which can eat into profits if it persists. Cash on hand also dropped by 13.2%, while debt edged down slightly, so the balance sheet shifted somewhat even as core profitability held steady."
     },
     {
       "ticker": "MSFT",
@@ -533,7 +533,7 @@
         ]
       },
       "description": "Software and cloud giant \u2014 Windows, Office, and Azure cloud computing.",
-      "story": "Microsoft posted solid growth this quarter, with revenue up 8.6%, net income up 12.5%, and free cash flow jumping 24.3% \u2014 extending a revenue growth streak that's now lasted nine straight quarters. But underneath those numbers, costs are creeping up: operating expenses grew faster than revenue for the second quarter in a row, and gross margin slipped slightly to 67.2%. The bigger surprise is cash on hand, which dropped 34.8% while debt ticked up 0.1%, an unusual combination of spending down reserves and borrowing more at the same time."
+      "story": "Microsoft's revenue climbed 8.6% and net income rose even more (+12.5%), with free cash flow up a strong 24.3%, continuing a nine-quarter streak of revenue growth. But the details underneath are less clean: operating expenses grew faster than revenue for a second straight quarter (+12.6% vs +8.6%), gross margin slipped slightly, and cash on hand plunged 34.8% while debt ticked up 0.1%. The combination of rising profits alongside a sharp cash drawdown and costs outpacing sales suggests the strong bottom-line numbers are masking some underlying pressure worth watching."
     },
     {
       "ticker": "SPCX",
@@ -598,7 +598,7 @@
         ]
       },
       "description": "Builds and launches rockets and satellites, including Starlink. IPO'd June 2026.",
-      "story": "SPCX's numbers over the trailing 12 months (comparing the year ending June 2026 to the year ending June 2025, not a single quarter) show broad-based improvement across the business. Revenue nearly doubled (+91.9%), and that growth came alongside a big jump in gross margin (from 43.9% to 55.3%), meaning the company is keeping more of each sales dollar after direct costs. Net income and diluted EPS both remain negative but improved substantially (+46.3% and +73.5% respectively), pointing toward a narrowing gap to profitability. Cash on hand grew more than sixfold (+525.1%), which \u2014 combined with the recent IPO \u2014 gives the company a much larger cash cushion than it had a year earlier."
+      "story": "SPCX's numbers over the 12 months ending June 2026 (a full-year comparison, not a single quarter) show a business scaling up significantly: revenue nearly doubled (+91.9%), and that growth came with better efficiency, as gross margin climbed from 43.9% to 55.3%. Net income improved 46.3% and diluted EPS rose 73.5%, though the company is still operating at a net loss even as that loss shrinks. Cash on hand jumped 525.1%, giving the company substantially more financial cushion, which is notable given it only IPO'd in June 2026."
     },
     {
       "ticker": "MU",
@@ -768,7 +768,7 @@
         ]
       },
       "description": "Makes memory and storage chips (DRAM and NAND) for computers, phones, and data centers.",
-      "story": "Micron had a standout quarter: revenue jumped 73.7% and net income more than doubled, with profit growing faster than sales thanks to a big jump in gross margin, from 74.4% to 84.6%. This margin strength suggests the company is selling its memory chips at much higher profitability than before, not just selling more of them. Cash on hand grew nearly 80% while debt held steady, and this performance extends a longer run of growth, with revenue and margins both climbing for five straight quarters."
+      "story": "Micron had a standout quarter: revenue jumped 73.7% and net income more than doubled, with gross margin climbing 10.2 points to 84.6%. That kind of margin expansion alongside strong sales growth suggests memory chip prices and demand moved strongly in Micron's favor. Cash on hand grew nearly 80% while debt stayed flat, and this builds on five straight quarters of both revenue growth and margin improvement, pointing to a sustained upswing rather than a one-off spike."
     },
     {
       "ticker": "SNDK",
@@ -909,7 +909,7 @@
         ]
       },
       "description": "Makes NAND flash storage and memory cards. Spun off from Western Digital in 2025.",
-      "story": "SanDisk had a standout quarter, with revenue jumping 50.7% and net income nearly doubling (+91.0%) compared to the prior quarter. Profitability also improved sharply, as gross margin climbed 6.2 points to 84.6%, meaning the company kept a much larger share of each sales dollar as profit. Cash on hand grew 27.5%, adding to the company's financial cushion. This performance continues a broader pattern, as both revenue and gross margin have now risen for five consecutive quarters."
+      "story": "SNDK, the flash memory storage maker spun off from Western Digital in 2025, had a standout quarter: revenue jumped 50.7% and net income nearly doubled, up 91.0%, while gross margin climbed 6.2 points to 84.6%. Cash on hand also grew 27.5%, giving the company a stronger financial cushion. This wasn't a one-off \u2014 revenue and gross margin have now both improved for five consecutive quarters, suggesting the growth and profitability gains are part of a sustained pattern rather than a single strong period."
     },
     {
       "ticker": "WDC",
@@ -1087,7 +1087,7 @@
         ]
       },
       "description": "Makes hard drives and storage systems, mainly for data centers.",
-      "story": "WDC's revenue climbed 12.3% and gross margin improved to 54.1%, continuing streaks of 5 straight quarters of revenue growth and 11 straight quarters of margin expansion. However, net income slipped slightly despite the stronger sales and margins, suggesting other costs are offsetting those gains. The company also cut debt by a third, but cash on hand dropped 23%, a notable one-quarter decline worth keeping an eye on."
+      "story": "WDC grew revenue 12.3% and pushed gross margin up nearly 4 points to 54.1%, continuing streaks of 5 straight quarters of revenue growth and 11 straight quarters of margin expansion \u2014 a sign the business is selling more and doing so more efficiently on a per-product basis. Yet none of that translated to the bottom line: net income slipped slightly, meaning costs elsewhere in the business ate up the gains from higher sales and better margins. At the same time, cash on hand dropped 23% in just one quarter, even as debt fell by a third, suggesting cash was likely used to pay down borrowing rather than sitting idle."
     },
     {
       "ticker": "STX",
@@ -1252,7 +1252,7 @@
         ]
       },
       "description": "Makes hard drives, mainly for data centers and cloud storage providers.",
-      "story": "Seagate (STX) had a strong quarter: revenue climbed 16.6% and net income jumped 73%, with gross margin expanding sharply from 46.5% to 52.3%. The company also strengthened its financial position, growing cash on hand by 48.6% while reducing debt by 2.5%. This continues a longer pattern of steady improvement, with revenue rising for five straight quarters and gross margin expanding for eleven consecutive quarters, suggesting the business has been consistently getting more efficient and profitable over time, not just this quarter."
+      "story": "Seagate had a standout quarter: revenue climbed 16.6% and net income surged 73.0%, while gross margin jumped 5.8 points to 52.3%, showing the company is not just selling more hard drives but doing so far more profitably. Cash on hand grew nearly 50% even as debt was slightly trimmed, leaving the balance sheet notably stronger. This performance builds on longer-running momentum, with revenue rising for five straight quarters and gross margin expanding for eleven consecutive quarters, suggesting the profitability gains are part of a sustained pattern rather than a one-off."
     }
   ]
 }
