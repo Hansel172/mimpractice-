@@ -1,24 +1,24 @@
 {
   "live": {
-    "updated": "2026-09-04T14:56:25+00:00",
+    "updated": "2026-09-07T16:26:22+00:00",
     "market": {
       "SP500": {
         "label": "S&P 500",
-        "value": 7747.71,
+        "value": 7718.6,
         "unit": "",
         "note": "last close",
-        "changePct": 1.06,
-        "asOf": "2026-09-03",
+        "changePct": -0.38,
+        "asOf": "2026-09-04",
         "source": "FRED SP500",
         "sourceUrl": "https://fred.stlouisfed.org/series/SP500"
       },
       "NASDAQCOM": {
         "label": "Nasdaq",
-        "value": 26584.06,
+        "value": 26506.99,
         "unit": "",
         "note": "last close",
-        "changePct": 1.4,
-        "asOf": "2026-09-03",
+        "changePct": -0.29,
+        "asOf": "2026-09-04",
         "source": "FRED NASDAQCOM",
         "sourceUrl": "https://fred.stlouisfed.org/series/NASDAQCOM"
       },
@@ -40,17 +40,17 @@
         "unit": "%",
         "note": "last close",
         "changePct": 0.0,
-        "asOf": "2026-09-02",
+        "asOf": "2026-09-03",
         "source": "FRED DFF",
         "sourceUrl": "https://fred.stlouisfed.org/series/DFF"
       },
       "DGS10": {
         "label": "10-year Treasury",
-        "value": 4.79,
+        "value": 4.77,
         "unit": "%",
         "note": "last close",
-        "changePct": 0.0,
-        "asOf": "2026-09-02",
+        "changePct": -0.42,
+        "asOf": "2026-09-03",
         "source": "FRED DGS10",
         "sourceUrl": "https://fred.stlouisfed.org/series/DGS10"
       },
